@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smfs-inference"
+version = "0.1.0"
+description = "Tools for analyzing allele mutation data and estimating site frequency spectrum models"
+authors = [{ name = "Deepjoyti Ghosh" }, { name = "Kyle Williams" }]
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "matplotlib"
+]
+
+[project.optional-dependencies]
+dev = ["black", "flake8"]
