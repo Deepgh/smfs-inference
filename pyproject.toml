@@ -10,13 +10,11 @@ authors = [{ name = "Deepjoyti Ghosh" }, { name = "Kyle Williams" }]
 dependencies = [
     "numpy",
     "pandas",
-    "scipy",
-    "matplotlib"
+    "scipy"
 ]
 
-[tool.setuptools]
-packages = ["smfs"]
-package-dir = {"" = "src"}
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [project.optional-dependencies]
 dev = ["black", "flake8", "pytest"]
