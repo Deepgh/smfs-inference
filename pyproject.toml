@@ -19,4 +19,4 @@ packages = ["smfs"]
 package-dir = {"" = "src"}
 
 [project.optional-dependencies]
-dev = ["black", "flake8"]
+dev = ["black", "flake8", "pytest"]

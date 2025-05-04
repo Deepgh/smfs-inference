@@ -14,18 +14,18 @@ from scipy.special import gammaln
 import os
 
 
-def estimate_lambda(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda):
+def estimate_lambda_sd(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda):
     def p0(lam,mu,sig):
         return np.exp(-(1+(mu/sig)**2)*np.log(1+(sig**2)*(lam/mu)))
 
     # Define the function to minimize
-    def objective_function(lam, mu_seg, mu_non_seg, sig_seg, sig_non_seg):
-        return -(sum(np.log(p0(lam, mu_non_seg, sig_non_seg))) + sum(np.log(1 - p0(lam, mu_seg, sig_seg))))
+    def objective_function(log_lam, mu_seg, mu_non_seg, sig_seg, sig_non_seg):
+        return -(sum(np.log(p0(np.exp(log_lam),mu_non_seg,sig_non_seg)))+sum(np.log(1-p0(np.exp(log_lam),mu_seg,sig_seg))))
 
     # Use the Nelder-Mead method to find the minimum
     result = minimize(
         objective_function, 
-        initial_lambda, 
+        np.log(initial_lambda), 
         method='nelder-mead', 
         args = (mu_seg, mu_non_seg, sig_seg, sig_non_seg),
         options={'xatol': 1e-8, 'disp': True}
@@ -33,7 +33,7 @@ def estimate_lambda(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda):
     return np.exp(result.x[0])
 
 
-def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
+def compute_gamma_distribution(data_df, lambd, unq_mut_limit):
     
     data_df['mu_sd_rat'] =  (data_df['Mean theta'] / data_df['SD theta'])** 2
     data_df['numerator factor'] = (lambd*data_df['Mean theta'])/data_df['mu_sd_rat']
@@ -42,7 +42,6 @@ def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
     stop_filling = False
 
     for unq_mut in range(unq_mut_limit+1):
-        print(unq_mut)
         if not stop_filling:
             col_name = f'Unq muts sites_{unq_mut}'
             
@@ -54,7 +53,6 @@ def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
             #print(data_df[col_name])
             
             poi_sum = sum(data_df[col_name])
-            print(poi_sum)
             if poi_sum == 0:
                 stop_filling = True
         else:
@@ -104,7 +102,7 @@ if __name__ == "__main__":
     sig_non_seg = data_df[data_df['AC']==0]['SD theta'].to_numpy()
 
 
-    lambd = estimate_lambda(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda=lam)
+    lambd = estimate_lambda_sd(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda=lam)
     print('Estimated lambda:', lambd)   
     lam_val =pd.DataFrame([{'Lambda':lambd}])
     save_csv(lam_val, output_path, output_lam_filename)
@@ -114,7 +112,7 @@ if __name__ == "__main__":
     # lam_df = pd.read_csv(os.path.join(path,lam_file))
     # lambd = list(lam_df['Lambda'])[0]
 
-    df1 = compute_poisson_distribution(data_df, lambd, unq_mut_limit)
+    df1 = compute_gamma_distribution(data_df, lambd, unq_mut_limit)
     save_csv(df1, output_path, sites_unq_mut_filename)
 
 

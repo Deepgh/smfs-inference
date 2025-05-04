@@ -15,12 +15,11 @@ import os
 
 
 def estimate_lambda(mu_seg, mu_non_seg, initial_lambda=1e8):
-    log_lam0 = np.log(initial_lambda)
    
     def estimate(log_lam, mu_seg, mu_non_seg):
         return -(sum(-(np.exp(log_lam))*mu_non_seg)+sum(np.log(1-np.exp(-(np.exp(log_lam))*mu_seg)))) 
 
-    res = minimize(estimate, log_lam0, method='nelder-mead',args=(mu_seg, mu_non_seg),
+    res = minimize(estimate, np.log(initial_lambda), method='nelder-mead',args=(mu_seg, mu_non_seg),
         options={'xatol': 1e-8, 'disp': True})
     return np.exp(res.x[0])
 
