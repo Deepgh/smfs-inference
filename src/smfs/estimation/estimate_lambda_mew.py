@@ -14,9 +14,9 @@ from pathlib import Path
 import os
 
 
-def estimate_lambda(mu_seg, mu_non_seg, log_lam0):
-
-    #%%    
+def estimate_lambda(mu_seg, mu_non_seg, initial_lambda=1e8):
+    log_lam0 = np.log(initial_lambda)
+   
     def estimate(log_lam, mu_seg, mu_non_seg):
         return -(sum(-(np.exp(log_lam))*mu_non_seg)+sum(np.log(1-np.exp(-(np.exp(log_lam))*mu_seg)))) 
 
@@ -29,13 +29,11 @@ def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
     df1 = pd.DataFrame()
     stop_filling = False
 
-    for unq_mut in range(unq_mut_limit + 1):
-        print(unq_mut)    
+    for unq_mut in range(unq_mut_limit + 1):   
         if not stop_filling:
             col_name = 'Unq muts sites_{unq_mut}'
             data_df[col_name] = poisson.pmf(unq_mut, lambd * data_df['Mutation rate'])
             poi_sum = sum(data_df[col_name])
-            print(poi_sum)
             
             if poi_sum == 0:
                 stop_filling = True

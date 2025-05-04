@@ -34,6 +34,10 @@ def estimate_lambda(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda):
 
 
 def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
+    
+    data_df['mu_sd_rat'] =  (data_df['Mean theta'] / data_df['SD theta'])** 2
+    data_df['numerator factor'] = (lambd*data_df['Mean theta'])/data_df['mu_sd_rat']
+    
     df1 = pd.DataFrame()
     stop_filling = False
 
@@ -86,6 +90,9 @@ if __name__ == "__main__":
     output_path = path
     output_lam_filename = 'lam_all_sim_data_smp_mu_diff_site.csv'
 
+    unq_mut_limit = 1000
+    sites_unq_mut_filename = f'unq_mut_sites_{unq_mut_limit}_ukbb_data_mew_sd.csv'
+    
     # df_3 = data_df[data_df['Meth level']==0]
     #data_df = data_df[data_df['Meth level']!=0]
     # print(len(df_3)/10**7, len(df_2)/10**5, (len(df_3)-len(df_2))/10**7)#
@@ -103,15 +110,10 @@ if __name__ == "__main__":
     save_csv(lam_val, output_path, output_lam_filename)
 
     #%%%
-    unq_mut_limit = 1000
-    sites_unq_mut_filename = f'unq_mut_sites_{unq_mut_limit}_ukbb_data_mew_sd.csv'
     # lam_file = 'lam_all.csv'
     # lam_df = pd.read_csv(os.path.join(path,lam_file))
     # lambd = list(lam_df['Lambda'])[0]
 
-    data_df['mu_sd_rat'] =  (data_df['Mean theta'] / data_df['SD theta'])** 2
-    data_df['numerator factor'] = (lambd*data_df['Mean theta'])/data_df['mu_sd_rat']
-    
     df1 = compute_poisson_distribution(data_df, lambd, unq_mut_limit)
     save_csv(df1, output_path, sites_unq_mut_filename)
 

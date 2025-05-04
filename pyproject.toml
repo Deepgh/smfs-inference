@@ -14,5 +14,9 @@ dependencies = [
     "matplotlib"
 ]
 
+[tool.setuptools]
+packages = ["smfs"]
+package-dir = {"" = "src"}
+
 [project.optional-dependencies]
 dev = ["black", "flake8"]
