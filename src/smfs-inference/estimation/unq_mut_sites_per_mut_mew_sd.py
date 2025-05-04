@@ -23,7 +23,7 @@ lam_file = 'lam_mu_sd_sim_data_diff_site.csv'
 
 
 unq_mut_limit = 1000
-output_filename = 'prob_sites_per_mut_'+str(unq_mut_limit)+'_sim_data_mu_sd_diff_site.csv'
+output_filename = f'prob_sites_per_mut_{unq_mut_limit}_sim_data_mu_sd_diff_site.csv'
 
 
 lam_df = pd.read_csv(os.path.join(lam_path, lam_file))
@@ -55,6 +55,6 @@ if __name__ == "__main__":
         with multiprocessing.Pool(number_of_cores) as pool:
             results = pool.map(single_iteration, [(i,mu_sd_rat, numerator_factor) for i in unique_mutations])
 
-        df_result['Mutation number ' + str(mut_num)] = results
+        df_result[f'Mutation number {mut_num}'] = results
 
     df_result.to_csv(os.path.join(lam_path, output_filename), index=False)
