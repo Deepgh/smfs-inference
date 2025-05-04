@@ -1,64 +1,62 @@
-import unittest
 import pandas as pd
 import os
+import pytest
 from smfs.estimation.estimate_lambda_mew import estimate_lambda, compute_poisson_distribution
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "test_data")
 
-class TestPoissonRegression(unittest.TestCase):
+@pytest.fixture
+def poisson_data():
+    input_df = pd.read_csv(os.path.join(DATA_DIR, "input_data.csv"))
+    expected_output = pd.read_csv(os.path.join(DATA_DIR, "expected_poisson.csv"))
+    expected_lambda = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))["Lambda poisson"].values[0]
+    return input_df, expected_output, expected_lambda
 
-    def setUp(self):
-        self.input_df = pd.read_csv(os.path.join(DATA_DIR, "input_data.csv"))
-        self.expected_output = pd.read_csv(os.path.join(DATA_DIR, "expected_poisson.csv"))
-        self.expected_lambda = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))
-        self.expected_lambda = self.expected_lambda["Lambda poisson"].values[0]
+@pytest.fixture
+def gamma_data():
+    input_df = pd.read_csv(os.path.join(DATA_DIR, "input_data.csv"))
+    expected_output = pd.read_csv(os.path.join(DATA_DIR, "expected_gamma.csv"))
+    expected_lambda = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))["Lambda gamma"].values[0]
+    return input_df, expected_output, expected_lambda
 
-    def test_lambda_regression(self):
-        mu_seg = self.input_df[self.input_df["AC"] != 0]["Mutation rate"].to_numpy()
-        mu_non_seg = self.input_df[self.input_df["AC"] == 0]["Mutation rate"].to_numpy()
+def test_poisson_lambda(poisson_data):
+    input_df, _, expected_lambda = poisson_data
+    mu_seg = input_df[input_df["AC"] != 0]["Mutation rate"].to_numpy()
+    mu_non_seg = input_df[input_df["AC"] == 0]["Mutation rate"].to_numpy()
 
-        lam = estimate_lambda(mu_seg, mu_non_seg)
-        self.assertAlmostEqual(lam, self.expected_lambda, places=8)
+    lam = estimate_lambda(mu_seg, mu_non_seg, method="poisson")
+    assert round(lam, 8) == round(expected_lambda, 8)
 
-    def test_poisson_regression(self):
-        unq_mut_limit = len(self.expected_output) - 1
+def test_poisson_distribution(poisson_data):
+    input_df, expected_output, expected_lambda = poisson_data
+    unq_mut_limit = len(expected_output) - 1
 
-        result = compute_poisson_distribution(self.input_df, self.expected_lambda, unq_mut_limit)
+    result = compute_poisson_distribution(input_df, expected_lambda, unq_mut_limit)
 
-        pd.testing.assert_frame_equal(
-            result.round(8),
-            self.expected_output.round(8),
-            rtol=1e-8,
-            check_dtype=False
-        )
+    pd.testing.assert_frame_equal(
+        result.round(8),
+        expected_output.round(8),
+        rtol=1e-8,
+        check_dtype=False
+    )
 
-class TestGammaRegression(unittest.TestCase):
+def test_gamma_lambda(gamma_data):
+    input_df, _, expected_lambda = gamma_data
+    mu_seg = input_df[input_df["AC"] != 0]["Mutation rate"].to_numpy()
+    mu_non_seg = input_df[input_df["AC"] == 0]["Mutation rate"].to_numpy()
 
-    def setUp(self):
-        self.input_df = pd.read_csv(os.path.join(DATA_DIR, "input_data.csv"))
-        self.expected_output = pd.read_csv(os.path.join(DATA_DIR, "expected_gamma.csv"))
-        self.expected_lambda = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))
-        self.expected_lambda = self.expected_lambda["Lambda gamma"].values[0]
+    lam = estimate_lambda(mu_seg, mu_non_seg, method="gamma")
+    assert round(lam, 8) == round(expected_lambda, 8)
 
-    def test_lambda_regression(self):
-        mu_seg = self.input_df[self.input_df["AC"] != 0]["Mutation rate"].to_numpy()
-        mu_non_seg = self.input_df[self.input_df["AC"] == 0]["Mutation rate"].to_numpy()
+def test_gamma_distribution(gamma_data):
+    input_df, expected_output, expected_lambda = gamma_data
+    unq_mut_limit = len(expected_output) - 1
 
-        lam = estimate_lambda(mu_seg, mu_non_seg)
-        self.assertAlmostEqual(lam, self.expected_lambda, places=8)
+    result = compute_poisson_distribution(input_df, expected_lambda, unq_mut_limit)
 
-    def test_poisson_regression(self):
-        unq_mut_limit = len(self.expected_output) - 1
-
-        result = compute_poisson_distribution(self.input_df, self.expected_lambda, unq_mut_limit)
-
-        pd.testing.assert_frame_equal(
-            result.round(8),
-            self.expected_output.round(8),
-            rtol=1e-8,
-            check_dtype=False
-        )
-
-
-if __name__ == "__main__":
-    unittest.main()
+    pd.testing.assert_frame_equal(
+        result.round(8),
+        expected_output.round(8),
+        rtol=1e-8,
+        check_dtype=False
+    )
