@@ -40,7 +40,7 @@ def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
     for unq_mut in range(unq_mut_limit+1):
         print(unq_mut)
         if not stop_filling:
-            col_name = 'Unq muts sites_'+str(unq_mut)
+            col_name = f'Unq muts sites_{unq_mut}'
             
             #data_df['numerator'] = data_df['numerator factor']**i
             
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     #%%%
     unq_mut_limit = 1000
-    sites_unq_mut_filename = 'unq_mut_sites_'+str(unq_mut_limit)+'_ukbb_data_mew_sd.csv'
+    sites_unq_mut_filename = f'unq_mut_sites_{unq_mut_limit}_ukbb_data_mew_sd.csv'
     # lam_file = 'lam_all.csv'
     # lam_df = pd.read_csv(os.path.join(path,lam_file))
     # lambd = list(lam_df['Lambda'])[0]

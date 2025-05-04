@@ -80,7 +80,7 @@ for mr in mut_rate_list:
             common_list_1.append(mr)
             sfs_common.append(sfs)
             
-print('Common list 1 match: '+str(len(common_list_1)))
+print(f'Common list 1 match: {len(common_list_1)}')
 #%%
 
 set1 = set(map(tuple, sfs_list))
@@ -127,12 +127,12 @@ for sw in mutr_swap_list:
             swap_match.append(sw)
             sfs_swap.append(j)
 
-print('Swap match: '+str(len(swap_match)))
+print(f'Swap match: {len(swap_match)}')
 #%%
 
 all_append = common_list_1 + swap_match 
 
-print('Len of all: '+str(len(all_append)))
+print(f'Len of all: {len(all_append)}')
 
 matched_df = pd.DataFrame(all_append, columns=["Anc DNA", "Der DNA", "Mut sum", "Mew",
                                                "Mean theta", "SD theta",

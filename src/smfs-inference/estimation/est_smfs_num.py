@@ -19,7 +19,7 @@ unq_mut_sites_file = 'unq_mut_sites_mu_1000_sim_data_diff_site.csv'
 
 ac_limit = 1000
 output_path = path
-output_filename = 'smfs_num_'+str(ac_limit)+'_sim_data_mu_diff_site.csv'
+output_filename = f'smfs_num_{ac_limit}_sim_data_mu_diff_site.csv'
 Path(output_path).mkdir(parents=True, exist_ok=True)
 
 data_df = pd.read_csv(os.path.join(path, data_file))
