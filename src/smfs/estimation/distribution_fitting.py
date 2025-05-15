@@ -93,33 +93,65 @@ def estimate_lambda_gamma(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lamb
     return np.exp(result.x[0])
 
 
-def compute_gamma_distribution(data_df, lambd, unq_mut_limit):
+def compute_gamma_distribution(
+    mean_theta: Union[np.ndarray, list],
+    sd_theta: Union[np.ndarray, list],
+    lambd: float,
+    unq_mut_limit: int,
+    stop_on_zero: bool = True
+) -> pd.DataFrame:
+    """
+    Compute total Gamma-distributed site probabilities for mutation counts 0..unq_mut_limit.
     
-    data_df['mu_sd_rat'] =  (data_df['Mean theta'] / data_df['SD theta'])** 2
-    data_df['numerator factor'] = (lambd*data_df['Mean theta'])/data_df['mu_sd_rat']
+    Parameters
+    ----------
+    data_df : pd.DataFrame
+        Must contain 'Mean theta' and 'SD theta' columns.
+    lambd : float
+        Lambda parameter for the Gamma distribution.
+    unq_mut_limit : int
+        Maximum number of unique mutations to compute.
+    stop_on_zero : bool
+        Whether to stop when total site probability hits 0.
+    pad_zeros : bool
+        Whether to fill remaining entries with 0s after stopping.
     
-    df1 = pd.DataFrame()
-    stop_filling = False
+    Returns
+    -------
+    pd.DataFrame
+        Columns: ['Unique mutation', 'Unq muts sites']
+    """
+    mu = np.asarray(mean_theta, dtype=float)
+    sigma = np.asarray(sd_theta, dtype=float)
 
-    for unq_mut in range(unq_mut_limit+1):
-        if not stop_filling:
-            col_name = f'Unq muts sites_{unq_mut}'
-            
-            #data_df['numerator'] = data_df['numerator factor']**i
-            
-            data_df[col_name] = np.exp(gammaln(unq_mut+data_df['mu_sd_rat']) - gammaln(1+unq_mut) -
-                                        gammaln(data_df['mu_sd_rat']) + unq_mut*np.log(data_df['numerator factor'])
-                                        - (unq_mut+data_df['mu_sd_rat'])*np.log(1+data_df['numerator factor']))
-            #print(data_df[col_name])
-            
-            poi_sum = sum(data_df[col_name])
-            if poi_sum == 0:
-                stop_filling = True
-        else:
-            poi_sum = 0  # After first zero, just fill 0s without any calculations
-        data =pd.DataFrame([{'Unique mutation': unq_mut, 'Unq muts sites':poi_sum}])
-        df1 = pd.concat([df1, data], ignore_index=True)
-    return df1
+    mu_sd_rat = (mu / sigma) ** 2
+    numerator = (lambd * mu) / mu_sd_rat
+
+    results = []
+
+    for k in range(unq_mut_limit + 1):
+        # Compute the generalized Negative Binomial-like probability
+        log_pmf = (
+            gammaln(k + mu_sd_rat)
+            - gammaln(1 + k)
+            - gammaln(mu_sd_rat)
+            + k * np.log(numerator)
+            - (k + mu_sd_rat) * np.log(1 + numerator)
+        )
+        total_prob = np.exp(log_pmf).sum()
+        results.append({'Unique mutation': k, 'Unq muts sites': total_prob})
+
+        if stop_on_zero and total_prob == 0:
+            break
+
+    # Pad with zeros if needed
+    last_k = results[-1]['Unique mutation']
+    results.extend(
+        {'Unique mutation': j, 'Unq muts sites': 0.0}
+        for j in range(last_k + 1, unq_mut_limit + 1)
+    )
+
+    return pd.DataFrame(results)    
 
 
 def load_data(data_path, filename):

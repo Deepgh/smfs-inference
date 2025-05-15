@@ -53,7 +53,7 @@ def test_gamma_distribution(gamma_data):
     input_df, expected_output, expected_lambda = gamma_data
     unq_mut_limit = len(expected_output) - 1
 
-    result = compute_gamma_distribution(input_df, expected_lambda, unq_mut_limit)
+    result = compute_gamma_distribution(input_df['Mean theta'], input_df['SD theta'], expected_lambda, unq_mut_limit)
 
     pd.testing.assert_frame_equal(
         result.round(8),
