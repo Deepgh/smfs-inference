@@ -12,6 +12,7 @@ from scipy.optimize import minimize
 from scipy.stats import poisson
 from scipy.special import gammaln
 from pathlib import Path
+from typing import Sequence, Union
 import os
 
 
@@ -29,24 +30,48 @@ def estimate_lambda_poisson(mu_seg, mu_non_seg, initial_lambda=1e8):
     return np.exp(res.x[0])
 
 
-def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
-    df1 = pd.DataFrame()
-    stop_filling = False
+def compute_poisson_distribution(
+    mutation_rates: Union[Sequence[float], np.ndarray],
+    lambd: float,
+    max_mut: int,
+    stop_on_zero: bool = True
+) -> pd.DataFrame:
+    """
+    Compute total Poisson-distributed site probabilities for mutation counts 0..max_mut.
 
-    for unq_mut in range(unq_mut_limit + 1):   
-        if not stop_filling:
-            col_name = 'Unq muts sites_{unq_mut}'
-            data_df[col_name] = poisson.pmf(unq_mut, lambd * data_df['Mutation rate'])
-            poi_sum = sum(data_df[col_name])
-            
-            if poi_sum == 0:
-                stop_filling = True
-        else:
-            poi_sum = 0  # After first zero, just fill 0s without any calculations
-        
-        data = pd.DataFrame([{'Unique mutation': unq_mut, 'Unq muts sites': poi_sum}])
-        df1 = pd.concat([df1, data], ignore_index=True)
-    return df1
+    Parameters
+    ----------
+    mutation_rates : array-like
+        Per-site mutation rates.
+    lambd : float
+        Poisson λ scaling factor.
+    max_mut : int
+        Max mutation count (inclusive).
+    stop_on_zero : bool
+        Stop early if the total becomes zero.
+
+    Returns
+    -------
+    pd.DataFrame
+        With columns: ["Unique mutation", "Unq muts sites"]
+    """
+
+    rates = np.asarray(mutation_rates, dtype=float)
+    result = []
+
+    for k in range(max_mut + 1):
+        p_sum = poisson.pmf(k, lambd * rates).sum()
+        result.append({'Unique mutation': k, 'Unq muts sites': p_sum})
+        if stop_on_zero and p_sum == 0:
+            break
+
+     # Add padding if needed // KW: Is this necessary?
+    last_k = result[-1]['Unique mutation']
+    result.extend(
+        {'Unique mutation': j, 'Unq muts sites': 0.0}
+        for j in range(last_k + 1, max_mut + 1)
+    )
+    return pd.DataFrame(result) # Should probably be a pd.Series
 
 
 def estimate_lambda_gamma(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda):
@@ -145,7 +170,7 @@ if __name__ == "__main__":
     #%%%
     # lam_df = pd.read_csv('/project/yuvalsim/Deep/project2/human_data/lam_human_data_all.csv')
     # lambd = list(lam_df['Lambda'])[0]
-    df1 = compute_poisson_distribution(data_df, lambd, unq_mut_limit)    
+    df1 = compute_poisson_distribution(data_df['Mutation rate'], lambd, unq_mut_limit)    
     save_csv(df1, output_path, sites_unq_mut_filename)
 
 

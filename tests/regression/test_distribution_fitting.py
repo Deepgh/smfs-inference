@@ -30,7 +30,7 @@ def test_poisson_distribution(poisson_data):
     input_df, expected_output, expected_lambda = poisson_data
     unq_mut_limit = len(expected_output) - 1
 
-    result = compute_poisson_distribution(input_df, expected_lambda, unq_mut_limit)
+    result = compute_poisson_distribution(input_df['Mutation rate'], expected_lambda, unq_mut_limit)
 
     pd.testing.assert_frame_equal(
         result.round(8),
