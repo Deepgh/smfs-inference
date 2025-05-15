@@ -10,17 +10,22 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 from scipy.stats import poisson
+from scipy.special import gammaln
 from pathlib import Path
 import os
 
 
-def estimate_lambda(mu_seg, mu_non_seg, initial_lambda=1e8):
+def estimate_lambda_poisson(mu_seg, mu_non_seg, initial_lambda=1e8):
    
     def estimate(log_lam, mu_seg, mu_non_seg):
         return -(sum(-(np.exp(log_lam))*mu_non_seg)+sum(np.log(1-np.exp(-(np.exp(log_lam))*mu_seg)))) 
 
-    res = minimize(estimate, np.log(initial_lambda), method='nelder-mead',args=(mu_seg, mu_non_seg),
-        options={'xatol': 1e-8, 'disp': True})
+    res = minimize(estimate, 
+        np.log(initial_lambda), 
+        method='nelder-mead',
+        args=(mu_seg, mu_non_seg),
+        options={'xatol': 1e-8, 'disp': True}
+    )
     return np.exp(res.x[0])
 
 
@@ -40,6 +45,54 @@ def compute_poisson_distribution(data_df, lambd, unq_mut_limit):
             poi_sum = 0  # After first zero, just fill 0s without any calculations
         
         data = pd.DataFrame([{'Unique mutation': unq_mut, 'Unq muts sites': poi_sum}])
+        df1 = pd.concat([df1, data], ignore_index=True)
+    return df1
+
+
+def estimate_lambda_gamma(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda):
+    def p0(lam,mu,sig):
+        return np.exp(-(1+(mu/sig)**2)*np.log(1+(sig**2)*(lam/mu)))
+
+    # Define the function to minimize
+    def objective_function(log_lam, mu_seg, mu_non_seg, sig_seg, sig_non_seg):
+        return -(sum(np.log(p0(np.exp(log_lam),mu_non_seg,sig_non_seg)))+sum(np.log(1-p0(np.exp(log_lam),mu_seg,sig_seg))))
+
+    # Use the Nelder-Mead method to find the minimum
+    result = minimize(
+        objective_function, 
+        np.log(initial_lambda), 
+        method='nelder-mead', 
+        args = (mu_seg, mu_non_seg, sig_seg, sig_non_seg),
+        options={'xatol': 1e-8, 'disp': True}
+    )
+    return np.exp(result.x[0])
+
+
+def compute_gamma_distribution(data_df, lambd, unq_mut_limit):
+    
+    data_df['mu_sd_rat'] =  (data_df['Mean theta'] / data_df['SD theta'])** 2
+    data_df['numerator factor'] = (lambd*data_df['Mean theta'])/data_df['mu_sd_rat']
+    
+    df1 = pd.DataFrame()
+    stop_filling = False
+
+    for unq_mut in range(unq_mut_limit+1):
+        if not stop_filling:
+            col_name = f'Unq muts sites_{unq_mut}'
+            
+            #data_df['numerator'] = data_df['numerator factor']**i
+            
+            data_df[col_name] = np.exp(gammaln(unq_mut+data_df['mu_sd_rat']) - gammaln(1+unq_mut) -
+                                        gammaln(data_df['mu_sd_rat']) + unq_mut*np.log(data_df['numerator factor'])
+                                        - (unq_mut+data_df['mu_sd_rat'])*np.log(1+data_df['numerator factor']))
+            #print(data_df[col_name])
+            
+            poi_sum = sum(data_df[col_name])
+            if poi_sum == 0:
+                stop_filling = True
+        else:
+            poi_sum = 0  # After first zero, just fill 0s without any calculations
+        data =pd.DataFrame([{'Unique mutation': unq_mut, 'Unq muts sites':poi_sum}])
         df1 = pd.concat([df1, data], ignore_index=True)
     return df1
 
@@ -84,7 +137,7 @@ if __name__ == "__main__":
 
     print(len(mu_seg), len(mu_non_seg), (len(mu_seg)+len(mu_non_seg))/10**6)
 
-    lambd = estimate_lambda(mu_seg, mu_non_seg, initial_lambda=lam)
+    lambd = estimate_lambda_poisson(mu_seg, mu_non_seg, initial_lambda=lam)
     print(lambd)
     lam_val = pd.DataFrame([{'Lambda':lambd}])
     save_csv(lam_val, output_path, output_lam_filename)
