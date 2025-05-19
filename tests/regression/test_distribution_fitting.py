@@ -1,7 +1,8 @@
+import numpy as np
 import pandas as pd
 import os
 import pytest
-from smfs.estimation.distribution_fitting import estimate_lambda_poisson, compute_poisson_distribution, estimate_lambda_gamma, compute_gamma_distribution
+from smfs.estimation.distribution_fitting import *
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "test_data")
 
 @pytest.fixture
@@ -19,18 +20,28 @@ def gamma_data():
     return input_df, expected_output, expected_lambda
 
 def test_poisson_lambda(poisson_data):
-    input_df, _, expected_lambda = poisson_data
-    mu_seg = input_df[input_df["AC"] != 0]["Mutation rate"].to_numpy()
-    mu_non_seg = input_df[input_df["AC"] == 0]["Mutation rate"].to_numpy()
+    df, _, expected_lambda = poisson_data
+    poisson_pmf = poisson_pmf_model(df['Mutation rate'])
 
-    lam = estimate_lambda_poisson(mu_seg, mu_non_seg, initial_lambda=1e8)
+    lam = fit_model_scaling(
+        p0_func=lambda lam: poisson_pmf(0, lam),
+        is_seg= df["AC"] != 0,
+        initial_lambda=1e8
+    )
     assert round(lam, 8) == round(expected_lambda, 8)
 
 def test_poisson_distribution(poisson_data):
-    input_df, expected_output, expected_lambda = poisson_data
-    unq_mut_limit = len(expected_output) - 1
+    df, expected_output, expected_lambda = poisson_data
+    poisson_pmf = poisson_pmf_model(df['Mutation rate'])
 
-    result = compute_poisson_distribution(input_df['Mutation rate'], expected_lambda, unq_mut_limit)
+    expected_site_counts = expected_sites_per_mutation_count(
+        site_mutation_probability= lambda k: poisson_pmf(k, expected_lambda),
+        max_mutations=len(expected_output) - 1
+    )
+    result = pd.DataFrame({
+        'Unique mutation': np.arange(len(expected_site_counts)),
+        'Unq muts sites': expected_site_counts
+    })
 
     pd.testing.assert_frame_equal(
         result.round(8),
@@ -41,20 +52,27 @@ def test_poisson_distribution(poisson_data):
 
 def test_gamma_lambda(gamma_data):
     input_df, _, expected_lambda = gamma_data
-    mu_seg = input_df[input_df["AC"] != 0]["Mean theta"].to_numpy()
-    mu_non_seg = input_df[input_df["AC"] == 0]["Mean theta"].to_numpy()
-    sig_seg = input_df[input_df["AC"] != 0]["SD theta"].to_numpy()
-    sig_non_seg = input_df[input_df["AC"] == 0]["SD theta"].to_numpy()
+    gamma_pmf = poisson_gamma_pmf_model(input_df['Mean theta'], input_df['SD theta'])
 
-    lam = estimate_lambda_gamma(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda=1e3)
+    lam = fit_model_scaling(
+        p0_func= lambda lam: gamma_pmf(0, lam),
+        is_seg= input_df["AC"] != 0,
+        initial_lambda=1e3
+    )
     assert round(lam, 8) == round(expected_lambda, 8)
 
 def test_gamma_distribution(gamma_data):
     input_df, expected_output, expected_lambda = gamma_data
-    unq_mut_limit = len(expected_output) - 1
+    gamma_pmf = poisson_gamma_pmf_model(input_df['Mean theta'], input_df['SD theta'])
 
-    result = compute_gamma_distribution(input_df['Mean theta'], input_df['SD theta'], expected_lambda, unq_mut_limit)
-
+    expected_site_counts = expected_sites_per_mutation_count(
+        site_mutation_probability= lambda k: gamma_pmf(k, expected_lambda),
+        max_mutations=len(expected_output) - 1
+    )
+    result = pd.DataFrame({
+        'Unique mutation': np.arange(len(expected_site_counts)),
+        'Unq muts sites': expected_site_counts
+    })
     pd.testing.assert_frame_equal(
         result.round(8),
         expected_output.round(8),

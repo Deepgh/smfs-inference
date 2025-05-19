@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 import numpy as np
-from smfs.estimation.distribution_fitting import estimate_lambda_poisson, compute_poisson_distribution,  estimate_lambda_gamma, compute_gamma_distribution
+from smfs.estimation.distribution_fitting import *
 
 def generate_poisson(DATA_DIR, input_data):
     input_data_path = os.path.join(DATA_DIR, input_data)
@@ -9,17 +9,32 @@ def generate_poisson(DATA_DIR, input_data):
     expected_output_path = os.path.join(DATA_DIR, "expected_poisson.csv")
 
     data_df = pd.read_csv(input_data_path)
-
-    mu_seg = data_df[data_df['AC']!=0]['Mutation rate'].to_numpy()
-    mu_non_seg = data_df[data_df['AC']==0]['Mutation rate'].to_numpy()
-
-    lambd = estimate_lambda_poisson(mu_seg, mu_non_seg, initial_lambda=1e8)
-    lam_val = pd.DataFrame([{'Lambda poisson':lambd}])
-    lam_val.to_csv(expected_lambda_path, index=False)
-
-    unq_mut_limit = 10
+    
     np.random.seed(42)
-    df1 = compute_poisson_distribution(data_df, lambd, unq_mut_limit)
+
+    poisson_pmf = poisson_pmf_model(data_df["Mutation rate"])
+
+    lambd = fit_model_scaling(
+        p0_func=lambda lam: poisson_pmf(0, lam),
+        is_seg= data_df["AC"] != 0,
+        initial_lambda=1e8
+    )
+    expected_site_counts = expected_sites_per_mutation_count(
+        site_mutation_probability= lambda k: poisson_pmf(k, lambd),
+        max_mutations=10
+    )
+    df1 = pd.DataFrame({
+        'Unique mutation': np.arange(len(expected_site_counts)),
+        'Unq muts sites': expected_site_counts
+    })
+
+    if os.path.exists(expected_lambda_path):
+        df = pd.read_csv(expected_lambda_path)
+    else:
+        df = pd.DataFrame()
+        
+    df['Lambda poisson'] = lambd
+    df.to_csv(expected_lambda_path, index=False)
     df1.to_csv(expected_output_path, index=False)
     
 
@@ -29,25 +44,31 @@ def generate_gamma(DATA_DIR, input_data):
     expected_output_path = os.path.join(DATA_DIR, "expected_gamma.csv")
 
     data_df = pd.read_csv(input_data_path)
+    np.random.seed(42)
 
-    mu_seg = data_df[data_df['AC']!=0]['Mean theta'].to_numpy()
-    mu_non_seg = data_df[data_df['AC']==0]['Mean theta'].to_numpy()
-    sig_seg = data_df[data_df['AC']!=0]['SD theta'].to_numpy()
-    sig_non_seg = data_df[data_df['AC']==0]['SD theta'].to_numpy()
+    poisson_gamma_pmf = poisson_gamma_pmf_model(data_df["Mean theta"], data_df["SD theta"])   
 
-    lambd = estimate_lambda_gamma(mu_seg, mu_non_seg, sig_seg, sig_non_seg, initial_lambda=1e3)
-    print('Estimated lambda:', lambd)   
+    lambd = fit_model_scaling(
+        p0_func=lambda lam: poisson_gamma_pmf(0, lam),
+        is_seg= data_df["AC"] != 0,
+        initial_lambda=1e3
+    )
+    expected_site_counts = expected_sites_per_mutation_count(
+        site_mutation_probability= lambda k: poisson_gamma_pmf(k, lambd),
+        max_mutations=10
+    )
+    df1 = pd.DataFrame({
+        'Unique mutation': np.arange(len(expected_site_counts)),
+        'Unq muts sites': expected_site_counts
+    })
 
     if os.path.exists(expected_lambda_path):
         df = pd.read_csv(expected_lambda_path)
     else:
         df = pd.DataFrame()
+
     df['Lambda gamma'] = lambd
     df.to_csv(expected_lambda_path, index=False)
-
-    unq_mut_limit = 10
-    np.random.seed(42)
-    df1 = compute_gamma_distribution(data_df, lambd, unq_mut_limit)
     df1.to_csv(expected_output_path, index=False)
 
 
