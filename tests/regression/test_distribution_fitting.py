@@ -79,3 +79,44 @@ def test_gamma_distribution(gamma_data):
         rtol=1e-8,
         check_dtype=False
     )
+
+def test_prob_sites_per_mutation_regression():
+    reference_path = os.path.join(DATA_DIR, "poisson_per_mut_type.csv")
+    input_data_path = os.path.join(DATA_DIR, "input_data.csv")
+    lambda_data_path = os.path.join(DATA_DIR, "expected_lambda.csv")
+    ref_df = pd.read_csv(reference_path)
+    input_df = pd.read_csv(input_data_path)
+    lambda_df = pd.read_csv(lambda_data_path)
+    # Use the same unq_mut_limit as in the reference file
+    unq_mut_limit = ref_df['Unique mutation'].max()
+    lambda_val = lambda_df['Lambda poisson'].iloc[0]
+
+    grouped_rates = (
+        input_df.groupby('Mutation number')['Mutation rate']
+        .apply(np.array)
+        .to_dict()
+    )
+
+    # Compute probabilities
+    pmf_model_by_mut_type = {
+        mut_type: poisson_pmf_model(rates)
+        for mut_type, rates in grouped_rates.items()
+    }
+
+    result_dict = {
+        mut_type : unique_mutation_distribution(lambda k: pmf_model(k, lambda_val), unq_mut_limit)
+        for mut_type, pmf_model in pmf_model_by_mut_type.items()
+    }   
+
+    # Convert result for comparison
+    result_df = pd.DataFrame({'Unique mutation': np.arange(unq_mut_limit + 1)})
+    for mut_num, probs in result_dict.items():
+        result_df[f"Mutation number {mut_num}"] = probs
+
+    # Validate
+    pd.testing.assert_frame_equal(
+        result_df.round(8),
+        ref_df.round(8),
+        rtol=1e-8,
+        check_dtype=False
+    )

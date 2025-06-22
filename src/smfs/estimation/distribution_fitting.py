@@ -59,6 +59,18 @@ def fit_model_scaling(
     return np.exp(result.x[0])
 
 
+def unique_mutation_distribution(
+        site_mutation_probability: Callable[[int], np.ndarray],
+        max_mutations: int,
+        stop_on_zero: bool = False
+) -> np.ndarray:
+    result = np.zeros(max_mutations + 1, dtype=float)
+    for k in range(max_mutations + 1):
+        result[k] = site_mutation_probability(k).mean() # P(# unique mutations = k)
+        if stop_on_zero and result[k] == 0.0: break
+    return result
+
+
 def expected_sites_per_mutation_count(
     site_mutation_probability: Callable[[int], np.ndarray],
     max_mutations: int, 
@@ -91,7 +103,6 @@ def expected_sites_per_mutation_count(
         result[k] = site_mutation_probability(k).sum()
         if stop_on_zero and result[k] == 0.0: break
     return result
-
 
 
 
