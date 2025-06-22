@@ -13,7 +13,9 @@ def test_smfs_fit_num_regression():
     data_df = pd.read_csv(data_file)
     sites_df = pd.read_csv(sites_file)
     ac_limit = 10
-    result = smfs_fit_num.compute(data_df, sites_df, ac_limit)
+    allele_counts = data_df['AC'].values
+    pmf_unq_mut_sites = sites_df['Unq muts sites'].values
+    result = smfs_fit_num.compute(allele_counts, pmf_unq_mut_sites, ac_limit)
     ref_df = pd.read_csv(ref_file)
     expected = ref_df['pred prob'].values
     assert np.allclose(result, expected, rtol=1e-3, atol=1e-6), f"Result: {result}, Expected: {expected}"

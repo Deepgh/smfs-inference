@@ -78,7 +78,9 @@ def generate_smfs_num_reference(DATA_DIR, input_data, sites_file, ac_limit=10):
     output_path = os.path.join(DATA_DIR, "smfs_num_reference.csv")
     data_df = pd.read_csv(data_file)
     sites_df = pd.read_csv(sites_file_path)
-    result = smfs_fit_num_compute(data_df, sites_df, ac_limit)
+    allele_counts = data_df['AC'].values
+    expected_sites_per_mutation_count = sites_df['Unq muts sites'].values
+    result = smfs_fit_num_compute(allele_counts, expected_sites_per_mutation_count, ac_limit)
     df = pd.DataFrame({
         'AC': np.arange(1, ac_limit+1),
         'pred prob': result
