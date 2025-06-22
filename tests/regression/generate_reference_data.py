@@ -3,6 +3,7 @@ import os
 import numpy as np
 from smfs.estimation.distribution_fitting import *
 from smfs.estimation.smfs_fit_num import compute as smfs_fit_num_compute
+from smfs.estimation.unq_mut_sites_per_mut_mew import generate_prob_sites_per_mutation
 
 def generate_poisson(DATA_DIR, input_data, max_mutations=10):
     input_data_path = os.path.join(DATA_DIR, input_data)
@@ -87,10 +88,20 @@ def generate_smfs_num_reference(DATA_DIR, input_data, sites_file, ac_limit=10):
     })
     df.to_csv(output_path, index=False)
 
+def generate_prob_sites_per_mutation_reference(DATA_DIR, input_data, lambda_data, unq_mut_limit):
+    input_data_path = os.path.join(DATA_DIR, input_data)
+    lambda_data_path = os.path.join(DATA_DIR, lambda_data)
+    output_path = os.path.join(DATA_DIR, f"poisson_per_mut_type.csv")
+
+    df = pd.read_csv(input_data_path)
+    lam_df = pd.read_csv(lambda_data_path)
+    df_result = generate_prob_sites_per_mutation(df, lam_df, unq_mut_limit=unq_mut_limit, number_of_cores=1)
+    df_result.to_csv(output_path, index=False)
 
 if __name__ == "__main__":
     DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "test_data")
-    generate_poisson(DATA_DIR, "input_data.csv")
-    generate_gamma(DATA_DIR, "input_data.csv")
-    generate_smfs_num_reference(DATA_DIR, "input_data.csv", "expected_poisson.csv", ac_limit=10)
+    # generate_poisson(DATA_DIR, "input_data.csv")
+    # generate_gamma(DATA_DIR, "input_data.csv")
+    # generate_smfs_num_reference(DATA_DIR, "input_data.csv", "expected_poisson.csv", ac_limit=10)
+    generate_prob_sites_per_mutation_reference(DATA_DIR, "input_data.csv", "expected_lambda.csv", unq_mut_limit=10)
 
