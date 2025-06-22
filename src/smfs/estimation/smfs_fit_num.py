@@ -42,17 +42,17 @@ def compute(allele_counts, expected_sites_per_mutation_count, ac_limit):
         Array of length `ac_limit`, where the k-1-th entry gives
         P(AC = k | 1 mutation) for k = 1 to ac_limit.
     """
-    expected_sites_1_mut = expected_sites_per_mutation_count[1] 
-
     p_ac_given_1_mut = np.zeros(ac_limit)
-    p_ac_given_1_mut[0] = np.sum(allele_counts == 1)/expected_sites_1_mut
-
-    for ac in range(2, ac_limit+1): 
+    for ac in range(1, ac_limit+1): 
         p_ac_given_j_mut = p_ac_given_1_mut[:ac-1]  
         expected_ac_count_from_gt1_mut = 0
         for j in range(2, ac+1):
             p_ac_given_j_mut = np.convolve(p_ac_given_1_mut[:ac-1], p_ac_given_j_mut)
             expected_ac_count_from_gt1_mut += p_ac_given_j_mut[ac - j]*expected_sites_per_mutation_count[j]
-        p_ac_given_1_mut[ac-1] = (np.sum(allele_counts == ac) - expected_ac_count_from_gt1_mut)/expected_sites_1_mut
+
+        p_ac_given_1_mut[ac-1] = (
+            (np.sum(allele_counts == ac) - expected_ac_count_from_gt1_mut)/expected_sites_per_mutation_count[1] 
+        )
+        
     return p_ac_given_1_mut
 
