@@ -2,8 +2,9 @@ import pandas as pd
 import os
 import numpy as np
 from smfs.estimation.distribution_fitting import *
+from smfs.estimation.smfs_fit_loglik import compute as smfs_fit_loglik_compute
 from smfs.estimation.smfs_fit_num import compute as smfs_fit_num_compute
-from examples.unq_mut_sites_per_mut_mew import generate_prob_sites_per_mutation
+# from examples.unq_mut_sites_per_mut_mew import generate_prob_sites_per_mutation
 
 def generate_poisson(DATA_DIR, input_data, max_mutations=10):
     input_data_path = os.path.join(DATA_DIR, input_data)
@@ -118,10 +119,34 @@ def generate_prob_sites_per_mutation_reference(DATA_DIR, input_data, lambda_data
 
     df_result.to_csv(os.path.join(DATA_DIR, f"poisson_per_mut_type.csv"), index=False)
 
+def generate_smfs_loglik_reference(DATA_DIR, input_data, sites_file, ac_limit=10):
+    data_file = os.path.join(DATA_DIR, input_data)
+    sites_file_path = os.path.join(DATA_DIR, sites_file)
+    output_path = os.path.join(DATA_DIR, "smfs_loglik_reference.csv")
+
+    data_df = pd.read_csv(data_file)
+    sites_df = pd.read_csv(sites_file_path)
+
+    # Fit the model to get the expected probabilities for each unique mutation
+    prob_ac_one_unq_mut = smfs_fit_loglik_compute(data_df, sites_df, ac_limit)
+
+    # Create a DataFrame with the results
+    df = pd.DataFrame({
+        'AC': np.arange(1, ac_limit + 1),
+        'pred prob': prob_ac_one_unq_mut
+    })
+
+    print(prob_ac_one_unq_mut)
+
+    # Save the results to a CSV file
+    df.to_csv(output_path, index=False)
+
 if __name__ == "__main__":
     DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "test_data")
     # generate_poisson(DATA_DIR, "input_data.csv")
     # generate_gamma(DATA_DIR, "input_data.csv")
     # generate_smfs_num_reference(DATA_DIR, "input_data.csv", "expected_poisson.csv", ac_limit=10)
-    generate_prob_sites_per_mutation_reference(DATA_DIR, "input_data.csv", "expected_lambda.csv", unq_mut_limit=10)
+    # generate_prob_sites_per_mutation_reference(DATA_DIR, "input_data.csv", "expected_lambda.csv", unq_mut_limit=10)
+    # generate_smfs_loglik_reference(DATA_DIR, "input_data.csv", "poisson_per_mut_type.csv", ac_limit=10)
+
 
