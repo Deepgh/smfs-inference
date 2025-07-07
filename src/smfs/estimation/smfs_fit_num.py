@@ -8,6 +8,23 @@ Created on Wed Dec  4 00:12:49 2024
 
 import numpy as np
 
+class BasicSMFSEstimator:
+    def __init__(self, allele_counts, expected_sites_1_mut):
+        self.counts = allele_counts
+        self.expected_sites_1_mut = expected_sites_1_mut
+    
+    def get(self, ac, expected_ac_count_from_gt1_mut):
+        return (np.sum(self.counts == ac) - expected_ac_count_from_gt1_mut)/self.expected_sites_1_mut
+    
+
+def marginal_p_k_given_j_gt1(k, p_k_given_j_eq1, p_j):
+    p_k_given_j = p_k_given_j_eq1[:k-1]  
+    p_k_given_j_gt1 = 0
+    for j in range(2, k+1):
+        p_k_given_j = np.convolve(p_k_given_j_eq1[:k-1], p_k_given_j)
+        p_k_given_j_gt1 += p_k_given_j[k - j]*p_j[j]
+    return p_k_given_j_gt1
+
 def compute(allele_counts, expected_sites_per_mutation_count, ac_limit):
     """
     Estimate the conditional site mutation frequency spectrum (SMFS), i.e.,
@@ -42,17 +59,11 @@ def compute(allele_counts, expected_sites_per_mutation_count, ac_limit):
         Array of length `ac_limit`, where the k-1-th entry gives
         P(AC = k | 1 mutation) for k = 1 to ac_limit.
     """
+    sfms = BasicSMFSEstimator(allele_counts, expected_sites_per_mutation_count[1])
     p_ac_given_1_mut = np.zeros(ac_limit)
     for ac in range(1, ac_limit+1): 
-        p_ac_given_j_mut = p_ac_given_1_mut[:ac-1]  
-        expected_ac_count_from_gt1_mut = 0
-        for j in range(2, ac+1):
-            p_ac_given_j_mut = np.convolve(p_ac_given_1_mut[:ac-1], p_ac_given_j_mut)
-            expected_ac_count_from_gt1_mut += p_ac_given_j_mut[ac - j]*expected_sites_per_mutation_count[j]
-
-        p_ac_given_1_mut[ac-1] = (
-            (np.sum(allele_counts == ac) - expected_ac_count_from_gt1_mut)/expected_sites_per_mutation_count[1] 
-        )
+        expected_ac_count_from_gt1_mut = marginal_p_k_given_j_gt1(ac, p_ac_given_1_mut, expected_sites_per_mutation_count)
+        p_ac_given_1_mut[ac-1] = sfms.get(ac, expected_ac_count_from_gt1_mut)
         
     return p_ac_given_1_mut
 

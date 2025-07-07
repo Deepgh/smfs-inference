@@ -29,7 +29,7 @@ def test_smfs_fit_loglik_regression():
     data_df = pd.read_csv(data_file)
     sites_df = pd.read_csv(sites_file)
     ac_limit = 10
-    result = smfs_fit_loglik.compute(data_df, sites_df, ac_limit)
+    result = smfs_fit_loglik.compute_sfms(data_df, sites_df, ac_limit)
     ref_df = pd.read_csv(ref_file)
     expected = ref_df['pred prob'].values
     assert np.allclose(result, expected, rtol=1e-3, atol=1e-6), f"Result: {result}, Expected: {expected}"
