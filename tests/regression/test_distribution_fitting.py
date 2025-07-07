@@ -28,7 +28,7 @@ def test_poisson_lambda(poisson_data):
         is_seg= df["AC"] != 0,
         initial_lambda=1e8
     )
-    assert round(lam, 8) == round(expected_lambda, 8)
+    assert pytest.approx(lam, rel=1e-8) == expected_lambda
 
 def test_poisson_distribution(poisson_data):
     df, expected_output, expected_lambda = poisson_data
