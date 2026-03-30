@@ -12,47 +12,53 @@ from scipy.stats import poisson, nbinom, bernoulli
 from typing import Callable, Sequence, Union
 
 def poisson_pmf_model(mutation_rates: Union[Sequence[float], np.ndarray]):
-    return lambda k, lam: poisson.pmf(k, lam * mutation_rates)
+    return lambda k, xi: poisson.pmf(k, xi * mutation_rates)
 
 def poisson_gamma_pmf_model(mu, sigma):
-    return lambda k, lam: nbinom.pmf(k, n=(mu/sigma)**2, p=1/(1 + sigma**2 *(lam/mu)))
+    return lambda k, xi: nbinom.pmf(k, n=(mu/sigma)**2, p=1/(1 + sigma**2 *(xi/mu)))
 
 def fit_model_scaling(
     p0_func: Callable[[float], np.ndarray],
     is_seg: np.ndarray,
-    initial_lambda: float = 1e8
+    initial_xi: float = 1e8,
+    initial_lambda: Union[float, None] = None,
 ) -> float:
     """
-    Estimate the global mutation rate scaling factor λ using binary segregation status.
+    Estimate the global mutation rate scaling factor xi using binary segregation status.
 
-    This function estimates λ by maximizing the likelihood of observing
+    This function estimates xi by maximizing the likelihood of observing
     segregating and non-segregating sites under a given probabilistic model
-    of P(K = 0 | λ), where K is the number of observed mutations at a site.
+    of P(K = 0 | xi), where K is the number of observed mutations at a site.
 
     Parameters
     ----------
     p0_func : Callable[[float], np.ndarray]
-        A function that takes a scalar λ and returns a vector of
-        probabilities P(K = 0 | λ) for each site.
+        A function that takes a scalar xi and returns a vector of
+        probabilities P(K = 0 | xi) for each site.
     is_seg : np.ndarray
         A boolean array where True indicates that the site is segregating
         (i.e., K > 0), and False indicates that the site is non-segregating (K = 0).
+    initial_xi : float, optional
+        Initial guess for xi (default is 1e8). Optimization is performed in log space.
     initial_lambda : float, optional
-        Initial guess for λ (default is 1e8). Optimization is performed in log space.
+        Deprecated alias for ``initial_xi`` kept for backward compatibility.
 
     Returns
     -------
     float
-        The maximum likelihood estimate of λ.
+        The maximum likelihood estimate of xi.
     """
-    def objective(log_lam: float) -> float:
-        lam = np.exp(log_lam)
-        p0 = p0_func(lam)
+    if initial_lambda is not None:
+        initial_xi = initial_lambda
+
+    def objective(log_xi: float) -> float:
+        xi = np.exp(log_xi)
+        p0 = p0_func(xi)
         return -bernoulli.logpmf(~is_seg, p0).sum()
     
     result = minimize(
         objective,
-        np.log(initial_lambda),
+        np.log(initial_xi),
         method='nelder-mead',
         options={'xatol': 1e-8, 'disp': True}
     )
@@ -103,7 +109,6 @@ def expected_sites_per_mutation_count(
         result[k] = site_mutation_probability(k).sum()
         if stop_on_zero and result[k] == 0.0: break
     return result
-
 
 
 

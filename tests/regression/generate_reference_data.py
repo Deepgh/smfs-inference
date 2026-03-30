@@ -8,7 +8,7 @@ from smfs.estimation.smfs_fit_num import compute as smfs_fit_num_compute
 
 def generate_poisson(DATA_DIR, input_data, max_mutations=10):
     input_data_path = os.path.join(DATA_DIR, input_data)
-    expected_lambda_path = os.path.join(DATA_DIR, "expected_lambda.csv")
+    expected_xi_path = os.path.join(DATA_DIR, "expected_lambda.csv")
     expected_output_path = os.path.join(DATA_DIR, "expected_poisson.csv")
 
     data_df = pd.read_csv(input_data_path)
@@ -17,13 +17,13 @@ def generate_poisson(DATA_DIR, input_data, max_mutations=10):
 
     poisson_pmf = poisson_pmf_model(data_df["Mutation rate"])
 
-    lambd = fit_model_scaling(
-        p0_func=lambda lam: poisson_pmf(0, lam),
-        is_seg= data_df["AC"] != 0,
-        initial_lambda=1e8
+    xi = fit_model_scaling(
+        p0_func=lambda xi: poisson_pmf(0, xi),
+        is_seg=data_df["AC"] != 0,
+        initial_xi=1e8
     )
     expected_site_counts = expected_sites_per_mutation_count(
-        site_mutation_probability= lambda k: poisson_pmf(k, lambd),
+        site_mutation_probability=lambda k: poisson_pmf(k, xi),
         max_mutations=max_mutations
     )
     df1 = pd.DataFrame({
@@ -31,19 +31,19 @@ def generate_poisson(DATA_DIR, input_data, max_mutations=10):
         'Unq muts sites': expected_site_counts
     })
 
-    if os.path.exists(expected_lambda_path):
-        df = pd.read_csv(expected_lambda_path)
+    if os.path.exists(expected_xi_path):
+        df = pd.read_csv(expected_xi_path)
     else:
         df = pd.DataFrame()
         
-    df['Lambda poisson'] = lambd
-    df.to_csv(expected_lambda_path, index=False)
+    df['Xi poisson'] = xi
+    df.to_csv(expected_xi_path, index=False)
     df1.to_csv(expected_output_path, index=False)
     
 
 def generate_gamma(DATA_DIR, input_data, max_mutations=10):
     input_data_path = os.path.join(DATA_DIR, input_data)
-    expected_lambda_path = os.path.join(DATA_DIR, "expected_lambda.csv")
+    expected_xi_path = os.path.join(DATA_DIR, "expected_lambda.csv")
     expected_output_path = os.path.join(DATA_DIR, "expected_gamma.csv")
 
     data_df = pd.read_csv(input_data_path)
@@ -51,13 +51,13 @@ def generate_gamma(DATA_DIR, input_data, max_mutations=10):
 
     poisson_gamma_pmf = poisson_gamma_pmf_model(data_df["Mean theta"], data_df["SD theta"])   
 
-    lambd = fit_model_scaling(
-        p0_func=lambda lam: poisson_gamma_pmf(0, lam),
-        is_seg= data_df["AC"] != 0,
-        initial_lambda=1e3
+    xi = fit_model_scaling(
+        p0_func=lambda xi: poisson_gamma_pmf(0, xi),
+        is_seg=data_df["AC"] != 0,
+        initial_xi=1e3
     )
     expected_site_counts = expected_sites_per_mutation_count(
-        site_mutation_probability= lambda k: poisson_gamma_pmf(k, lambd),
+        site_mutation_probability=lambda k: poisson_gamma_pmf(k, xi),
         max_mutations=max_mutations
     )
     df1 = pd.DataFrame({
@@ -65,13 +65,13 @@ def generate_gamma(DATA_DIR, input_data, max_mutations=10):
         'Unq muts sites': expected_site_counts
     })
 
-    if os.path.exists(expected_lambda_path):
-        df = pd.read_csv(expected_lambda_path)
+    if os.path.exists(expected_xi_path):
+        df = pd.read_csv(expected_xi_path)
     else:
         df = pd.DataFrame()
 
-    df['Lambda gamma'] = lambd
-    df.to_csv(expected_lambda_path, index=False)
+    df['Xi gamma'] = xi
+    df.to_csv(expected_xi_path, index=False)
     df1.to_csv(expected_output_path, index=False)
 
 def generate_smfs_num_reference(DATA_DIR, input_data, sites_file, ac_limit=10):
@@ -89,13 +89,13 @@ def generate_smfs_num_reference(DATA_DIR, input_data, sites_file, ac_limit=10):
     })
     df.to_csv(output_path, index=False)
 
-def generate_prob_sites_per_mutation_reference(DATA_DIR, input_data, lambda_data, unq_mut_limit):
+def generate_prob_sites_per_mutation_reference(DATA_DIR, input_data, xi_data, unq_mut_limit):
     input_data_path = os.path.join(DATA_DIR, input_data)
-    lambda_data_path = os.path.join(DATA_DIR, lambda_data)
+    xi_data_path = os.path.join(DATA_DIR, xi_data)
 
     df = pd.read_csv(input_data_path)
-    lam_df = pd.read_csv(lambda_data_path)
-    lambda_val = lam_df['Lambda poisson'].iloc[0]
+    xi_df = pd.read_csv(xi_data_path)
+    xi = xi_df['Xi poisson'].iloc[0]
 
     grouped_rates = (
         df.groupby('Mutation number')['Mutation rate']
@@ -109,7 +109,7 @@ def generate_prob_sites_per_mutation_reference(DATA_DIR, input_data, lambda_data
     }
 
     df_result_dict = {
-        mut_type : unique_mutation_distribution(lambda k: pmf_model_by_mut_type[mut_type](k, lambda_val), unq_mut_limit)
+        mut_type: unique_mutation_distribution(lambda k: pmf_model_by_mut_type[mut_type](k, xi), unq_mut_limit)
         for mut_type in pmf_model_by_mut_type
     }   
 
@@ -148,5 +148,4 @@ if __name__ == "__main__":
     # generate_smfs_num_reference(DATA_DIR, "input_data.csv", "expected_poisson.csv", ac_limit=10)
     # generate_prob_sites_per_mutation_reference(DATA_DIR, "input_data.csv", "expected_lambda.csv", unq_mut_limit=10)
     # generate_smfs_loglik_reference(DATA_DIR, "input_data.csv", "poisson_per_mut_type.csv", ac_limit=10)
-
 

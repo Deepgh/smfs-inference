@@ -19,7 +19,7 @@ def load_data(data_path, filename):
         raise FileNotFoundError(f"Data path {data_path} does not exist.")
     if not os.path.exists(os.path.join(data_path, filename)):   
         raise FileNotFoundError(f"File {filename} does not exist in {data_path}.")
-    return pd.read_csv(os.path.join(data_path, filename))
+    return pd.read_csv(os.path.join(data_path, filename), compression="infer")
 
 
 def save_csv(df, output_path, filename, overwrite=False):
@@ -40,13 +40,13 @@ if __name__ == "__main__":
 
     poisson_gamma_pmf = poisson_gamma_pmf_model(data_df["Mean theta"], data_df["SD theta"])
 
-    lambda0 = fit_model_scaling(
-        p0_func=lambda lam: poisson_gamma_pmf(0, lam),
-        is_seg= data_df["AC"] != 0,
-        initial_lambda=1e8
+    xi = fit_model_scaling(
+        p0_func=lambda xi: poisson_gamma_pmf(0, xi),
+        is_seg=data_df["AC"] != 0,
+        initial_xi=1e8
     )
     expected_site_counts = expected_sites_per_mutation_count(
-        site_mutation_probability= lambda k: poisson_gamma_pmf(k, lambda0),
+        site_mutation_probability=lambda k: poisson_gamma_pmf(k, xi),
         max_mutations=unq_mut_limit
     )
     df1 = pd.DataFrame({
@@ -54,12 +54,11 @@ if __name__ == "__main__":
         'Unq muts sites': expected_site_counts
     })
 
-    print('Estimated lambda:', lambda0)   
-    lam_val = pd.DataFrame([{'Lambda':lambda0}])
+    print('Estimated xi:', xi)
+    xi_val = pd.DataFrame([{'Xi': xi}])
 
-    save_csv(lam_val, output_path, 'lam_all_sim_data_smp_mu_diff_site.csv')
+    save_csv(xi_val, output_path, 'xi_all_sim_data_smp_mu_diff_site.csv')
     save_csv(df1, output_path, f'unq_mut_sites_{unq_mut_limit}_ukbb_data_mew_sd.csv')
-
 
 
 

@@ -18,19 +18,19 @@ path = '/project/yuvalsim/Deep/project2/human_data/sim_hum_data/final_approach/s
 data_file = 'edited_sim_data_smp_mu_diff_site.csv'
 df = pd.read_csv(os.path.join(path,data_file))
 
-lam_path = path
-lam_file = 'lam_mu_sd_sim_data_diff_site.csv'
+xi_path = path
+xi_file = 'xi_mu_sd_sim_data_diff_site.csv'
 
 
 unq_mut_limit = 1000
 output_filename = f'prob_sites_per_mut_{unq_mut_limit}_sim_data_mu_sd_diff_site.csv'
 
 
-lam_df = pd.read_csv(os.path.join(lam_path, lam_file))
-lambd = list(lam_df['Lambda'])[0]
+xi_df = pd.read_csv(os.path.join(xi_path, xi_file))
+xi = list(xi_df['Xi'])[0]
 
 df['mu_sd_rat'] = (df['Mean theta'] / df['SD theta']) ** 2
-df['numerator factor'] = (lambd * df['Mean theta']) / df['mu_sd_rat']
+df['numerator factor'] = (xi * df['Mean theta']) / df['mu_sd_rat']
 
 def single_iteration(args):
     iter, mu_sd_rat, numerator_factor = args
@@ -57,4 +57,4 @@ if __name__ == "__main__":
 
         df_result[f'Mutation number {mut_num}'] = results
 
-    df_result.to_csv(os.path.join(lam_path, output_filename), index=False)
+    df_result.to_csv(os.path.join(xi_path, output_filename), index=False)

@@ -9,33 +9,33 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "test_data")
 def poisson_data():
     input_df = pd.read_csv(os.path.join(DATA_DIR, "input_data.csv"))
     expected_output = pd.read_csv(os.path.join(DATA_DIR, "expected_poisson.csv"))
-    expected_lambda = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))["Lambda poisson"].values[0]
-    return input_df, expected_output, expected_lambda
+    expected_xi = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))["Xi poisson"].values[0]
+    return input_df, expected_output, expected_xi
 
 @pytest.fixture
 def gamma_data():
     input_df = pd.read_csv(os.path.join(DATA_DIR, "input_data.csv"))
     expected_output = pd.read_csv(os.path.join(DATA_DIR, "expected_gamma.csv"))
-    expected_lambda = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))["Lambda gamma"].values[0]
-    return input_df, expected_output, expected_lambda
+    expected_xi = pd.read_csv(os.path.join(DATA_DIR, "expected_lambda.csv"))["Xi gamma"].values[0]
+    return input_df, expected_output, expected_xi
 
-def test_poisson_lambda(poisson_data):
-    df, _, expected_lambda = poisson_data
+def test_poisson_xi(poisson_data):
+    df, _, expected_xi = poisson_data
     poisson_pmf = poisson_pmf_model(df['Mutation rate'])
 
-    lam = fit_model_scaling(
-        p0_func=lambda lam: poisson_pmf(0, lam),
-        is_seg= df["AC"] != 0,
-        initial_lambda=1e8
+    xi = fit_model_scaling(
+        p0_func=lambda xi: poisson_pmf(0, xi),
+        is_seg=df["AC"] != 0,
+        initial_xi=1e8
     )
-    assert pytest.approx(lam, rel=1e-8) == expected_lambda
+    assert pytest.approx(xi, rel=1e-8) == expected_xi
 
 def test_poisson_distribution(poisson_data):
-    df, expected_output, expected_lambda = poisson_data
+    df, expected_output, expected_xi = poisson_data
     poisson_pmf = poisson_pmf_model(df['Mutation rate'])
 
     expected_site_counts = expected_sites_per_mutation_count(
-        site_mutation_probability= lambda k: poisson_pmf(k, expected_lambda),
+        site_mutation_probability=lambda k: poisson_pmf(k, expected_xi),
         max_mutations=len(expected_output) - 1
     )
     result = pd.DataFrame({
@@ -50,23 +50,23 @@ def test_poisson_distribution(poisson_data):
         check_dtype=False
     )
 
-def test_gamma_lambda(gamma_data):
-    input_df, _, expected_lambda = gamma_data
+def test_gamma_xi(gamma_data):
+    input_df, _, expected_xi = gamma_data
     gamma_pmf = poisson_gamma_pmf_model(input_df['Mean theta'], input_df['SD theta'])
 
-    lam = fit_model_scaling(
-        p0_func= lambda lam: gamma_pmf(0, lam),
-        is_seg= input_df["AC"] != 0,
-        initial_lambda=1e3
+    xi = fit_model_scaling(
+        p0_func=lambda xi: gamma_pmf(0, xi),
+        is_seg=input_df["AC"] != 0,
+        initial_xi=1e3
     )
-    assert round(lam, 8) == round(expected_lambda, 8)
+    assert round(xi, 8) == round(expected_xi, 8)
 
 def test_gamma_distribution(gamma_data):
-    input_df, expected_output, expected_lambda = gamma_data
+    input_df, expected_output, expected_xi = gamma_data
     gamma_pmf = poisson_gamma_pmf_model(input_df['Mean theta'], input_df['SD theta'])
 
     expected_site_counts = expected_sites_per_mutation_count(
-        site_mutation_probability= lambda k: gamma_pmf(k, expected_lambda),
+        site_mutation_probability=lambda k: gamma_pmf(k, expected_xi),
         max_mutations=len(expected_output) - 1
     )
     result = pd.DataFrame({
@@ -83,13 +83,13 @@ def test_gamma_distribution(gamma_data):
 def test_prob_sites_per_mutation_regression():
     reference_path = os.path.join(DATA_DIR, "poisson_per_mut_type.csv")
     input_data_path = os.path.join(DATA_DIR, "input_data.csv")
-    lambda_data_path = os.path.join(DATA_DIR, "expected_lambda.csv")
+    xi_data_path = os.path.join(DATA_DIR, "expected_lambda.csv")
     ref_df = pd.read_csv(reference_path)
     input_df = pd.read_csv(input_data_path)
-    lambda_df = pd.read_csv(lambda_data_path)
+    xi_df = pd.read_csv(xi_data_path)
     # Use the same unq_mut_limit as in the reference file
     unq_mut_limit = ref_df['Unique mutation'].max()
-    lambda_val = lambda_df['Lambda poisson'].iloc[0]
+    xi = xi_df['Xi poisson'].iloc[0]
 
     grouped_rates = (
         input_df.groupby('Mutation number')['Mutation rate']
@@ -104,7 +104,7 @@ def test_prob_sites_per_mutation_regression():
     }
 
     result_dict = {
-        mut_type : unique_mutation_distribution(lambda k: pmf_model(k, lambda_val), unq_mut_limit)
+        mut_type: unique_mutation_distribution(lambda k: pmf_model(k, xi), unq_mut_limit)
         for mut_type, pmf_model in pmf_model_by_mut_type.items()
     }   
 

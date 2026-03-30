@@ -13,16 +13,16 @@ It processes simulation-based datasets and applies computational models to infer
 
 * Per-site recurrence probabilities.
 * Mutation-specific parameters (`μ`, `θ`, etc.).
-* Lambda (`λ`): the effective mutation flux or compound rate parameter of interest.
+* Xi (`ξ`): the effective mutation flux or compound rate parameter of interest.
 * Adjusted SFS prediction curves for publication or regression testing.
 
 ## Project Structure
 
-* `matching_data_ext.py`: Aligns mutation rate and methylation-level datasets to simulation-based SFS entries.
-* `estimate_lambda_mew.py` / `estimate_lambda_mew_sd.py`: Estimate the global mutation flux parameter (`λ`) using observed segregating/non-segregating counts.
+* `matching_mut_rate_simple.py`: Aligns mutation rate and methylation-level datasets to simulation-based SFS entries by mutation-context triplet.
+* `estimate_lambda_mew.py` / `estimate_lambda_mew_sd.py`: Estimate the global mutation flux parameter (`ξ`) using observed segregating/non-segregating counts.
 * `unq_mut_sites_per_mut_mew.py`: Predicts the expected number of sites with a given number of unique mutations per mutation type using Poisson processes.
 * `unq_mut_sites_per_mut_mew_sd.py`: Extends the above with variance modeling using negative binomial distributions.
-* `est_smfs_num.py`: Uses convolution to numerically estimate the expected SFS under the inferred model.
+* `est_smfs_num.py`: Uses convolution to numerically estimate the expected SFS under the inferred model, including simulation tables where rows can represent multiple sites.
 * `est_smfs_log_lik.py`: Applies likelihood maximization to derive the predicted SFS and estimate the probability of recurrent mutation events.
 
 ## Input Data
@@ -44,7 +44,7 @@ pip install numpy pandas scipy matplotlib
 
 Each script can be run as a top-level program. Paths to data files must be updated or mocked as appropriate for your environment.
 
-Example (estimating lambda):
+Example (estimating xi):
 
 ```bash
 python estimate_lambda_mew.py
@@ -65,7 +65,7 @@ python est_smfs_log_lik.py
 ## Output
 
 * CSV tables of predicted allele count frequencies.
-* Tabulated lambda estimates per dataset.
+* Tabulated xi estimates per dataset.
 * Intermediate files with predicted number of unique mutations per count.
 
 These are useful for:
