@@ -21,6 +21,28 @@ def test_smfs_fit_num_regression():
     expected = ref_df['pred prob'].values
     assert np.allclose(result, expected, rtol=1e-3, atol=1e-6), f"Result: {result}, Expected: {expected}"
 
+
+def test_smfs_fit_num_weighted_rows_matches_expanded_rows():
+    allele_counts = np.array([1, 2, 3])
+    site_weights = np.array([5, 2, 1])
+    expanded_counts = np.repeat(allele_counts, site_weights)
+    expected_sites_per_mutation_count = np.array([0.0, 10.0, 3.0, 1.0, 0.5])
+    ac_limit = 3
+
+    weighted_result = smfs_fit_num.compute(
+        allele_counts,
+        expected_sites_per_mutation_count,
+        ac_limit,
+        site_weights=site_weights,
+    )
+    expanded_result = smfs_fit_num.compute(
+        expanded_counts,
+        expected_sites_per_mutation_count,
+        ac_limit,
+    )
+
+    assert np.allclose(weighted_result, expanded_result)
+
     
 def test_smfs_fit_loglik_regression():
     data_file = os.path.join(DATA_DIR, "input_data.csv")
@@ -33,4 +55,3 @@ def test_smfs_fit_loglik_regression():
     ref_df = pd.read_csv(ref_file)
     expected = ref_df['pred prob'].values
     assert np.allclose(result, expected, rtol=1e-3, atol=1e-6), f"Result: {result}, Expected: {expected}"
-

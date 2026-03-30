@@ -9,12 +9,14 @@ Created on Wed Dec  4 00:12:49 2024
 import numpy as np
 
 class BasicSMFSEstimator:
-    def __init__(self, allele_counts, expected_sites_1_mut):
+    def __init__(self, allele_counts, expected_sites_1_mut, site_weights=None):
         self.counts = allele_counts
+        self.site_weights = np.ones_like(allele_counts, dtype=float) if site_weights is None else site_weights
         self.expected_sites_1_mut = expected_sites_1_mut
     
     def get(self, ac, expected_ac_count_from_gt1_mut):
-        return (np.sum(self.counts == ac) - expected_ac_count_from_gt1_mut)/self.expected_sites_1_mut
+        observed_ac_count = self.site_weights[self.counts == ac].sum()
+        return (observed_ac_count - expected_ac_count_from_gt1_mut)/self.expected_sites_1_mut
     
 
 def marginal_p_k_given_j_gt1(k, p_k_given_j_eq1, p_j):
@@ -25,7 +27,7 @@ def marginal_p_k_given_j_gt1(k, p_k_given_j_eq1, p_j):
         p_k_given_j_gt1 += p_k_given_j[k - j]*p_j[j]
     return p_k_given_j_gt1
 
-def compute(allele_counts, expected_sites_per_mutation_count, ac_limit):
+def compute(allele_counts, expected_sites_per_mutation_count, ac_limit, site_weights=None):
     """
     Estimate the conditional site mutation frequency spectrum (SMFS), i.e.,
     P(AC = k | 1 mutation), for allele counts ranging from 1 to `ac_limit`.
@@ -53,17 +55,20 @@ def compute(allele_counts, expected_sites_per_mutation_count, ac_limit):
         Maximum allele count (inclusive) to compute SMFS up to. Must be smaller than or 
         equal to the max number of mutations used in `expected_sites_per_mutation_count`.
 
+    site_weights : np.ndarray, optional
+        Optional per-row weights giving how many sites each row represents.
+        When omitted, each row is treated as a single site.
+
     Returns
     -------
     np.ndarray
         Array of length `ac_limit`, where the k-1-th entry gives
         P(AC = k | 1 mutation) for k = 1 to ac_limit.
     """
-    sfms = BasicSMFSEstimator(allele_counts, expected_sites_per_mutation_count[1])
+    sfms = BasicSMFSEstimator(allele_counts, expected_sites_per_mutation_count[1], site_weights=site_weights)
     p_ac_given_1_mut = np.zeros(ac_limit)
     for ac in range(1, ac_limit+1): 
         expected_ac_count_from_gt1_mut = marginal_p_k_given_j_gt1(ac, p_ac_given_1_mut, expected_sites_per_mutation_count)
         p_ac_given_1_mut[ac-1] = sfms.get(ac, expected_ac_count_from_gt1_mut)
         
     return p_ac_given_1_mut
-
