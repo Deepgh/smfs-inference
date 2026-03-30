@@ -24,6 +24,9 @@ It processes simulation-based datasets and applies computational models to infer
 * `unq_mut_sites_per_mut_mew_sd.py`: Extends the above with variance modeling using negative binomial distributions.
 * `est_smfs_num.py`: Uses convolution to numerically estimate the expected SFS under the inferred model, including simulation tables where rows can represent multiple sites.
 * `est_smfs_log_lik.py`: Applies likelihood maximization to derive the predicted SFS and estimate the probability of recurrent mutation events.
+* `scaled_mu_from_musd.py`: Samples site-level mutation rates from mutation-type-level gamma summaries.
+* `pop_growth_sampled_mu_diff_sites.py` / `sampled_muts.py`: Simulate recurrent mutation growth and downsample to an observed cohort.
+* `der_allele_sum_per_site.py` / `input_miss_rows.py`: Collapse simulated mutations back to one row per site and reinsert zero-count sites.
 
 ## Input Data
 
