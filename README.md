@@ -7,6 +7,8 @@ This repository contains Python scripts used to analyze the human site frequency
 
 The scripts currently use hard-coded input and output paths from the original analysis environment. Before running them in a new environment, update the path variables near the top of each script.
 
+Alternatively, pass a TOML config file with `--config`. `configs/current_behavior.toml` preserves the original defaults, and `configs/template.toml` is a user-editable starting point.
+
 ## Overview
 
 The code supports two related workflows:
@@ -75,6 +77,7 @@ The analysis relies on:
 The original data files are not included in this repository due to size and project-specific storage constraints.
 
 See `docs/input_files.md` for the expected input columns and generated outputs for each script.
+See `docs/config_variables.md` for the available TOML config variables.
 
 ## Requirements
 

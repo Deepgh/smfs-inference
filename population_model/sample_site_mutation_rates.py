@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "population_model.sample_site_mutation_rates"
 
 # Paths and files
 INPUT_FILE = (
@@ -126,6 +134,8 @@ def plot_diagnostics(df):
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     df = pd.read_csv(INPUT_FILE, sep="\t")
     df = df.drop(DROP_COLUMNS, axis=1)
     df = add_gamma_parameters(df)
@@ -133,7 +143,12 @@ def main():
     write_expanded_site_rates(df)
 
     df[[SAMPLED_MU_COL, SAMPLED_SD_COL]] = df.apply(
-        lambda row: sample_mean(row[GAMMA_SHAPE_COL], row[GAMMA_SCALE_COL], row[SEED_COL]),
+        lambda row: sample_mean(
+            row[GAMMA_SHAPE_COL],
+            row[GAMMA_SCALE_COL],
+            row[SEED_COL],
+            DIAGNOSTIC_SAMPLE_SIZE,
+        ),
         axis=1,
     )
 

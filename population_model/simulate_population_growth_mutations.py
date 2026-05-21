@@ -3,10 +3,17 @@
 import math
 import multiprocessing
 import os
+import sys
+from pathlib import Path
 from random import randrange
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "population_model.simulate_population_growth_mutations"
 
 # Paths and files
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
@@ -123,6 +130,8 @@ def move_column_first(df, column):
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     sampled_mu_df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))

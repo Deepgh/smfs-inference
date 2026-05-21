@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
 
 import os
+import sys
+from pathlib import Path
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "population_model.fill_missing_simulation_sites"
 
 # Paths and files
 DERIVED_ALLELE_DIR = (
@@ -23,6 +30,8 @@ AC_COL = "AC"
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     derived_allele_df = pd.read_csv(

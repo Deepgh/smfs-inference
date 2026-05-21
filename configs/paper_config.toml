@@ -1,0 +1,169 @@
+# This config preserves the original paths, filenames, column names, and defaults
+# that are hard-coded in the scripts used when producing results for publicaiton.
+
+[smfs.match_sfs_to_mutation_rates]
+sfs_file = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_syn_ac_1M.csv.gz"
+mutation_rate_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/ajhg_00004094_supp_table2_mut.tsv"
+output_file = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_per_site_missense_ac_1M.csv.gz"
+save_output = false
+ref_context_col = "ref_context"
+alt_context_col = "alt_context"
+methylation_level_col = "methylation_level"
+sites_col = "Sites"
+mutation_sum_col = "mut_sum"
+mu_gnomad_col = "mu_gnomad"
+mean_theta_col = "mean_theta"
+sd_theta_col = "sd_theta"
+error_col = "error"
+methylation_level_out_col = "Meth level"
+mu_out_col = "Mew"
+mean_theta_out_col = "Mean theta"
+sd_theta_out_col = "SD theta"
+error_out_col = "Error"
+
+[smfs.estimate_lambda_poisson]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+output_xi_file = "lam_smp_mu.csv"
+site_col = "Site"
+mu_col = "Sampled mu"
+ac_col = "AC"
+initial_xi = 1000.0
+unique_mutation_limit = 300
+output_unique_mutation_file = "unq_mut_sites_300_sim_smp_mu.csv"
+optimizer_method = "nelder-mead"
+eps = 0.000000000001
+
+[smfs.estimate_lambda_negative_binomial]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+input_file = "sfs_genes_dist.csv.gz"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+output_xi_file = "lam_mu_sd_josh.csv"
+save_xi_output = false
+sites_col = "Sites"
+mean_col = "Mean theta"
+sd_col = "SD theta"
+ac_col = "AC_nfe_down"
+initial_xi = 1000.0
+unique_mutation_limit = 300
+output_unique_mutation_file = "unq_mut_sites_300_josh_mew_sd.csv"
+optimizer_method = "nelder-mead"
+eps = 0.000000000001
+
+[smfs.estimate_smfs_from_unique_mutations]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+unique_mutation_sites_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+unique_mutation_sites_file = "unq_mut_sites_300_josh_mu.csv"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+ac_col = "AC_"
+sites_col = "Sites"
+unique_mutation_sites_col = "Unq muts sites"
+ac_limit = 300
+output_file = "smfs_num_300_sim_smp_mu.csv"
+apply_error_correction = false
+error_file = "ajhg_00004094_supp_table2_mut.tsv"
+error_num_sites_col = "num_sites"
+error_rate_col = "error"
+error_scale = 1000000
+
+[population_model.sample_site_mutation_rates]
+input_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/ajhg_00004094_supp_table2_mut.tsv"
+expanded_output_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/scaled_mu_diff_site.csv"
+diagnostic_output_file = "/project/yuvalsim/Deep/project2/human_data/sim_hum_data/final_approach/scaled_mu_from_musd.csv"
+mean_theta_col = "mean_theta"
+sd_theta_col = "sd_theta"
+scaled_mu_col = "scaled mu"
+scaled_sd_col = "scaled sd"
+gamma_shape_col = "k"
+gamma_scale_col = "theta"
+seed_col = "seed"
+num_sites_col = "num_sites"
+mu_gnomad_col = "mu_gnomad"
+methylation_level_col = "methylation_level"
+sampled_mu_col = "sampled mu"
+sampled_sd_col = "sampled sd"
+diff_col = "diff"
+diff_sd_col = "diffsd"
+mutation_number_out_col = "Mutation number"
+mutation_rate_out_col = "Mutation rate"
+mean_theta_out_col = "Mean theta"
+sd_theta_out_col = "SD theta"
+methylation_level_out_col = "Meth_level"
+sampled_mu_out_col = "Sampled mu"
+random_seed_max = 1000000000
+diagnostic_sample_size = 100000
+show_diagnostic_plots = true
+write_diagnostic_output = true
+
+[population_model.simulate_population_growth_mutations]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+input_file = "scaled_mu_diff_site.csv"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+output_file = "der_allel_gamma_smp_mu_diff_site.csv"
+mutation_rate_output_file = "mut_rates_gamma_smp_diff_site.csv"
+site_col = "Site"
+mutation_number_col = "Mutation number"
+mutation_rate_col = "Mutation rate"
+mean_theta_col = "Mean theta"
+sd_theta_col = "SD theta"
+methylation_level_col = "Meth level"
+input_methylation_level_col = "Meth_level"
+sampled_mu_col = "Sampled mu"
+allele_copies_col = "Allele copies"
+mutation_id_col = "Mutation id"
+initial_population = 10000
+final_population = 100000000
+time_scale_multiplier = 250
+normal_approximation_threshold = 1000000000
+random_seed_modulus = 123456789123456
+random_seed_range = 20000000
+
+[population_model.sample_observed_mutations]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+input_file = "der_allel_gamma_smp_mu_diff_site.csv"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/sampled_data"
+output_file = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+allele_copies_col = "Allele copies"
+sampled_mutation_col = "Sampled mutation"
+final_population = 200000000
+sample_size = 1000000
+
+[population_model.summarize_derived_alleles_by_site]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/sampled_data/"
+input_file = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/sampled_data/"
+output_file = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
+site_col = "Site"
+mutation_id_col = "Mutation id"
+methylation_level_col = "Meth level"
+mutation_rate_col = "Mutation rate"
+mutation_number_col = "Mutation number"
+mean_theta_col = "Mean theta"
+sd_theta_col = "SD theta"
+sampled_mu_col = "Sampled mu"
+sampled_mutation_col = "Sampled mutation"
+
+[population_model.fill_missing_simulation_sites]
+derived_allele_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/sampled_data/"
+derived_allele_file = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
+mutation_rate_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+mutation_rate_file = "mut_rates_gamma_smp_diff_site.csv"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+output_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+site_col = "Site"
+sampled_mutation_sum_col = "Sampled mutation sum"
+unique_mutations_col = "Unique mutations"
+ac_col = "AC"
+
+[population_model.estimate_simulated_smfs_from_unique_mutations]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+unique_mutation_sites_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+unique_mutation_sites_file = "unq_mut_sites_300_sim_mew_sd.csv"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
+ac_col = "AC"
+unique_mutation_sites_col = "Unq muts sites"
+ac_limit = 300
+output_file = "smfs_num_300_sim_mew_sd.csv"

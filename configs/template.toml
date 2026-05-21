@@ -1,0 +1,89 @@
+# Copy this file and edit paths/settings for your environment.
+# Example:
+#   cp configs/template.toml configs/my_analysis.toml
+#   python smfs/estimate_lambda_poisson.py --config configs/my_analysis.toml
+
+[smfs.match_sfs_to_mutation_rates]
+sfs_file = "data/sfs_syn_ac_1M.csv.gz"
+mutation_rate_file = "data/ajhg_00004094_supp_table2_mut.tsv"
+output_file = "results/sfs_per_site_missense_ac_1M.csv.gz"
+save_output = true
+
+[smfs.estimate_lambda_poisson]
+input_dir = "results"
+input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+output_dir = "results"
+output_xi_file = "lam_smp_mu.csv"
+initial_xi = 1000.0
+unique_mutation_limit = 300
+output_unique_mutation_file = "unq_mut_sites_300_sim_smp_mu.csv"
+
+[smfs.estimate_lambda_negative_binomial]
+input_dir = "data"
+input_file = "sfs_genes_dist.csv.gz"
+output_dir = "results"
+output_xi_file = "lam_mu_sd_josh.csv"
+save_xi_output = false
+initial_xi = 1000.0
+unique_mutation_limit = 300
+output_unique_mutation_file = "unq_mut_sites_300_josh_mew_sd.csv"
+
+[smfs.estimate_smfs_from_unique_mutations]
+input_dir = "results"
+input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+unique_mutation_sites_dir = "results"
+unique_mutation_sites_file = "unq_mut_sites_300_josh_mu.csv"
+output_dir = "results"
+ac_limit = 300
+output_file = "smfs_num_300_sim_smp_mu.csv"
+apply_error_correction = false
+error_file = "data/ajhg_00004094_supp_table2_mut.tsv"
+
+[population_model.sample_site_mutation_rates]
+input_file = "data/ajhg_00004094_supp_table2_mut.tsv"
+expanded_output_file = "results/scaled_mu_diff_site.csv"
+diagnostic_output_file = "results/scaled_mu_from_musd.csv"
+diagnostic_sample_size = 100000
+show_diagnostic_plots = false
+write_diagnostic_output = true
+
+[population_model.simulate_population_growth_mutations]
+input_dir = "results"
+input_file = "scaled_mu_diff_site.csv"
+output_dir = "results"
+output_file = "der_allel_gamma_smp_mu_diff_site.csv"
+mutation_rate_output_file = "mut_rates_gamma_smp_diff_site.csv"
+initial_population = 10000
+final_population = 100000000
+time_scale_multiplier = 250
+
+[population_model.sample_observed_mutations]
+input_dir = "results"
+input_file = "der_allel_gamma_smp_mu_diff_site.csv"
+output_dir = "results/sampled_data"
+output_file = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+final_population = 200000000
+sample_size = 1000000
+
+[population_model.summarize_derived_alleles_by_site]
+input_dir = "results/sampled_data"
+input_file = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+output_dir = "results/sampled_data"
+output_file = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
+
+[population_model.fill_missing_simulation_sites]
+derived_allele_dir = "results/sampled_data"
+derived_allele_file = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
+mutation_rate_dir = "results"
+mutation_rate_file = "mut_rates_gamma_smp_diff_site.csv"
+output_dir = "results"
+output_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+
+[population_model.estimate_simulated_smfs_from_unique_mutations]
+input_dir = "results"
+input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+unique_mutation_sites_dir = "results"
+unique_mutation_sites_file = "unq_mut_sites_300_sim_mew_sd.csv"
+output_dir = "results"
+ac_limit = 300
+output_file = "smfs_num_300_sim_mew_sd.csv"

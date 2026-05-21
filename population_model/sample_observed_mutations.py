@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
 import os
+import sys
+from pathlib import Path
 
 import pandas as pd
 from scipy.stats import hypergeom
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "population_model.sample_observed_mutations"
 
 # Paths and files
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
@@ -21,6 +28,8 @@ SAMPLE_SIZE = 2 * 5 * (10**5)
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))

@@ -2,9 +2,16 @@
 
 import multiprocessing
 import os
+import sys
 import warnings
+from pathlib import Path
 
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "population_model.summarize_derived_alleles_by_site"
 
 # Paths and files
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/sampled_data/"
@@ -51,6 +58,8 @@ def single_iteration(group):
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE), compression="gzip")
     number_of_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
     grouped_df = df.groupby(SITE_COL)

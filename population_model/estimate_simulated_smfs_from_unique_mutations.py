@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "population_model.estimate_simulated_smfs_from_unique_mutations"
 
 # Paths and files
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
@@ -23,6 +29,8 @@ OUTPUT_FILE = f"smfs_num_{AC_LIMIT}_sim_mew_sd.csv"
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     data_df = pd.read_csv(
         os.path.join(INPUT_DIR, INPUT_FILE),
         compression="gzip",

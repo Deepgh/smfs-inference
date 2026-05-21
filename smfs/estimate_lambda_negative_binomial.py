@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 from pathlib import Path
 from warnings import simplefilter
 
@@ -8,6 +9,11 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 from scipy.stats import nbinom
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "smfs.estimate_lambda_negative_binomial"
 
 # Paths and files
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
@@ -60,6 +66,8 @@ def neg_loglik(log_xi, mu_seg, mu_non, sig_seg, sig_non):
 
 
 def main():
+    apply_config(CONFIG_SECTION, globals())
+
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
     data_df = pd.read_csv(
