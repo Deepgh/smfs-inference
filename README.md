@@ -20,49 +20,49 @@ The analysis uses tabular input data containing mutation rates, methylation leve
 
 ### `smfs/`
 
-* `smfs/matching_mut_rate_simple.py`: Matches SFS rows to mutation-rate metadata by reference context, alternate context, and methylation level. It also attempts a reverse-complement context match for rows that do not match directly, then merges matched mutation-rate fields such as `mu_gnomad`, `mean_theta`, `sd_theta`, and error estimates into the SFS data.
+* `smfs/match_sfs_to_mutation_rates.py`: Matches SFS rows to mutation-rate metadata by reference context, alternate context, and methylation level. It also attempts a reverse-complement context match for rows that do not match directly, then merges matched mutation-rate fields such as `mu_gnomad`, `mean_theta`, `sd_theta`, and error estimates into the SFS data.
 
-* `smfs/estimate_lambda_mew_updated.py`: Estimates a global lambda parameter using a Poisson model with site-specific sampled mutation rates. It separates segregating and non-segregating sites, minimizes the negative log-likelihood for lambda, writes the lambda estimate, and computes the expected number of sites with each possible number of unique mutations.
+* `smfs/estimate_lambda_poisson.py`: Estimates a global lambda parameter using a Poisson model with site-specific sampled mutation rates. It separates segregating and non-segregating sites, minimizes the negative log-likelihood for lambda, writes the lambda estimate, and computes the expected number of sites with each possible number of unique mutations.
 
-* `smfs/estimate_lambda_mew_sd_updtaed.py`: Estimates lambda while accounting for uncertainty in mutation-rate/theta estimates using a negative-binomial marginal model. It uses per-site mean and standard deviation columns, estimates lambda by likelihood optimization, and writes expected counts of sites with each number of unique mutations.
+* `smfs/estimate_lambda_negative_binomial.py`: Estimates lambda while accounting for uncertainty in mutation-rate/theta estimates using a negative-binomial marginal model. It uses per-site mean and standard deviation columns, estimates lambda by likelihood optimization, and writes expected counts of sites with each number of unique mutations.
 
-* `smfs/est_smfs_num.py`: Uses the expected unique-mutation count distribution and observed allele-count data to numerically derive predicted SMFS probabilities up to a specified allele-count limit. This version is configured for data where allele-count observations are stored with site-count weights.
+* `smfs/estimate_smfs_from_unique_mutations.py`: Uses the expected unique-mutation count distribution and observed allele-count data to numerically derive predicted SMFS probabilities up to a specified allele-count limit. This version is configured for data where allele-count observations are stored with site-count weights.
 
 ### `population_model/`
 
-* `population_model/scaled_mu_from_musd.py`: Reads mutation-rate metadata with mean and standard deviation values, converts those values into gamma-distribution parameters, samples per-site mutation rates, and writes an expanded table with one sampled mutation-rate row per site. It also includes diagnostic plots comparing sampled and input values.
+* `population_model/sample_site_mutation_rates.py`: Reads mutation-rate metadata with mean and standard deviation values, converts those values into gamma-distribution parameters, samples per-site mutation rates, and writes an expanded table with one sampled mutation-rate row per site. It also includes diagnostic plots comparing sampled and input values.
 
-* `population_model/pop_growth_sampled_mu_diff_sites.py`: Simulates mutation accumulation through a growing population using sampled site-specific mutation rates. It outputs both simulated derived-allele observations and the mutation-rate table used for each simulated site.
+* `population_model/simulate_population_growth_mutations.py`: Simulates mutation accumulation through a growing population using sampled site-specific mutation rates. It outputs both simulated derived-allele observations and the mutation-rate table used for each simulated site.
 
-* `population_model/sampled_muts.py`: Samples observed mutations from simulated allele-copy counts using a hypergeometric model. It filters out mutations not observed in the sample and writes the sampled mutation data to a compressed CSV file.
+* `population_model/sample_observed_mutations.py`: Samples observed mutations from simulated allele-copy counts using a hypergeometric model. It filters out mutations not observed in the sample and writes the sampled mutation data to a compressed CSV file.
 
-* `population_model/der_allele_sum_per_site.py`: Aggregates sampled mutation records by site. For each site, it computes the total sampled derived-allele count, the number of unique mutations, and carries forward metadata such as mutation rate, methylation level, sampled mu, mean theta, and standard deviation of theta.
+* `population_model/summarize_derived_alleles_by_site.py`: Aggregates sampled mutation records by site. For each site, it computes the total sampled derived-allele count, the number of unique mutations, and carries forward metadata such as mutation rate, methylation level, sampled mu, mean theta, and standard deviation of theta.
 
-* `population_model/input_miss_rows.py`: Merges per-site derived-allele summaries back into the full mutation-rate table so sites with no observed sampled mutations are retained. Missing allele-count and unique-mutation values are filled with zero, producing an edited simulation dataset for downstream SMFS estimation.
+* `population_model/fill_missing_simulation_sites.py`: Merges per-site derived-allele summaries back into the full mutation-rate table so sites with no observed sampled mutations are retained. Missing allele-count and unique-mutation values are filled with zero, producing an edited simulation dataset for downstream SMFS estimation.
 
-* `population_model/est_smfs_num_sims.py`: Numerically estimates predicted SMFS probabilities from simulated data and an expected unique-mutation count distribution. This script is similar in purpose to `smfs/est_smfs_num.py`, but is configured for simulation data where allele counts are counted by rows rather than by a separate site-count column.
+* `population_model/estimate_simulated_smfs_from_unique_mutations.py`: Numerically estimates predicted SMFS probabilities from simulated data and an expected unique-mutation count distribution. This script is similar in purpose to `smfs/estimate_smfs_from_unique_mutations.py`, but is configured for simulation data where allele counts are counted by rows rather than by a separate site-count column.
 
 ## Typical Workflow
 
 A typical simulation workflow is:
 
 ```bash
-python population_model/scaled_mu_from_musd.py
-python population_model/pop_growth_sampled_mu_diff_sites.py
-python population_model/sampled_muts.py
-python population_model/der_allele_sum_per_site.py
-python population_model/input_miss_rows.py
+python population_model/sample_site_mutation_rates.py
+python population_model/simulate_population_growth_mutations.py
+python population_model/sample_observed_mutations.py
+python population_model/summarize_derived_alleles_by_site.py
+python population_model/fill_missing_simulation_sites.py
 ```
 
 A typical SMFS estimation workflow is:
 
 ```bash
-python smfs/estimate_lambda_mew_updated.py
-python smfs/estimate_lambda_mew_sd_updtaed.py
-python smfs/est_smfs_num.py
+python smfs/estimate_lambda_poisson.py
+python smfs/estimate_lambda_negative_binomial.py
+python smfs/estimate_smfs_from_unique_mutations.py
 ```
 
-Use `smfs/matching_mut_rate_simple.py` when preparing SFS data that needs to be matched to mutation-rate metadata before estimation.
+Use `smfs/match_sfs_to_mutation_rates.py` when preparing SFS data that needs to be matched to mutation-rate metadata before estimation.
 
 ## Input Data
 
