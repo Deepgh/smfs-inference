@@ -1,84 +1,106 @@
 # Allele Mutation Spectrum Modeling and Recurrent Mutation Estimation
 
-This repository contains Python scripts used to analyze the human site frequency spectrum (SFS) to infer the probability of recurrent mutations and mutation-specific rates in population genomic data. The work contributes to understanding how often mutations at the same site arise independently, a critical factor in interpreting rare variant patterns, molecular evolution, and disease genetics.
+This repository contains Python scripts used to analyze the human site frequency spectrum (SFS), estimate recurrent mutation probabilities, and simulate allele-count data under population growth. The code is organized as two independent script collections:
+
+* `smfs/`: scripts for matching mutation-rate metadata, estimating lambda, estimating expected numbers of unique mutations, and deriving predicted SMFS curves.
+* `population_model/`: scripts for generating and processing simulated population-genetic data used by the SMFS analyses.
+
+The scripts currently use hard-coded input and output paths from the original analysis environment. Before running them in a new environment, update the path variables near the top of each script.
 
 ## Overview
 
-The code estimates the expected number and distribution of unique mutations at each allele count using two approaches:
+The code supports two related workflows:
 
-* **Maximum likelihood estimation (MLE)** to fit a Poisson or negative binomial model of mutation recurrence.
-* **Convolution-based modeling** to account for recurrence due to shared site-specific mutation rates.
+* Simulation of mutation counts across sites under a growing population model.
+* Estimation of recurrent mutation quantities and predicted site-frequency spectra from simulation or observed-data summaries.
 
-It processes simulation-based datasets and applies computational models to infer:
+The analysis uses tabular input data containing mutation rates, methylation levels, allele counts, site counts, and mutation-specific uncertainty parameters such as mean and standard deviation of theta.
 
-* Per-site recurrence probabilities.
-* Mutation-specific parameters (`μ`, `θ`, etc.).
-* Lambda (`λ`): the effective mutation flux or compound rate parameter of interest.
-* Adjusted SFS prediction curves for publication or regression testing.
+## File Descriptions
 
-## Project Structure
+### `smfs/`
 
-* `matching_data_ext.py`: Aligns mutation rate and methylation-level datasets to simulation-based SFS entries.
-* `estimate_lambda_mew.py` / `estimate_lambda_mew_sd.py`: Estimate the global mutation flux parameter (`λ`) using observed segregating/non-segregating counts.
-* `unq_mut_sites_per_mut_mew.py`: Predicts the expected number of sites with a given number of unique mutations per mutation type using Poisson processes.
-* `unq_mut_sites_per_mut_mew_sd.py`: Extends the above with variance modeling using negative binomial distributions.
-* `est_smfs_num.py`: Uses convolution to numerically estimate the expected SFS under the inferred model.
-* `est_smfs_log_lik.py`: Applies likelihood maximization to derive the predicted SFS and estimate the probability of recurrent mutation events.
+* `smfs/matching_mut_rate_simple.py`: Matches SFS rows to mutation-rate metadata by reference context, alternate context, and methylation level. It also attempts a reverse-complement context match for rows that do not match directly, then merges matched mutation-rate fields such as `mu_gnomad`, `mean_theta`, `sd_theta`, and error estimates into the SFS data.
+
+* `smfs/estimate_lambda_mew_updated.py`: Estimates a global lambda parameter using a Poisson model with site-specific sampled mutation rates. It separates segregating and non-segregating sites, minimizes the negative log-likelihood for lambda, writes the lambda estimate, and computes the expected number of sites with each possible number of unique mutations.
+
+* `smfs/estimate_lambda_mew_sd_updtaed.py`: Estimates lambda while accounting for uncertainty in mutation-rate/theta estimates using a negative-binomial marginal model. It uses per-site mean and standard deviation columns, estimates lambda by likelihood optimization, and writes expected counts of sites with each number of unique mutations.
+
+* `smfs/est_smfs_num.py`: Uses the expected unique-mutation count distribution and observed allele-count data to numerically derive predicted SMFS probabilities up to a specified allele-count limit. This version is configured for data where allele-count observations are stored with site-count weights.
+
+### `population_model/`
+
+* `population_model/scaled_mu_from_musd.py`: Reads mutation-rate metadata with mean and standard deviation values, converts those values into gamma-distribution parameters, samples per-site mutation rates, and writes an expanded table with one sampled mutation-rate row per site. It also includes diagnostic plots comparing sampled and input values.
+
+* `population_model/pop_growth_sampled_mu_diff_sites.py`: Simulates mutation accumulation through a growing population using sampled site-specific mutation rates. It outputs both simulated derived-allele observations and the mutation-rate table used for each simulated site.
+
+* `population_model/sampled_muts.py`: Samples observed mutations from simulated allele-copy counts using a hypergeometric model. It filters out mutations not observed in the sample and writes the sampled mutation data to a compressed CSV file.
+
+* `population_model/der_allele_sum_per_site.py`: Aggregates sampled mutation records by site. For each site, it computes the total sampled derived-allele count, the number of unique mutations, and carries forward metadata such as mutation rate, methylation level, sampled mu, mean theta, and standard deviation of theta.
+
+* `population_model/input_miss_rows.py`: Merges per-site derived-allele summaries back into the full mutation-rate table so sites with no observed sampled mutations are retained. Missing allele-count and unique-mutation values are filled with zero, producing an edited simulation dataset for downstream SMFS estimation.
+
+* `population_model/est_smfs_num_sims.py`: Numerically estimates predicted SMFS probabilities from simulated data and an expected unique-mutation count distribution. This script is similar in purpose to `smfs/est_smfs_num.py`, but is configured for simulation data where allele counts are counted by rows rather than by a separate site-count column.
+
+## Typical Workflow
+
+A typical simulation workflow is:
+
+```bash
+python population_model/scaled_mu_from_musd.py
+python population_model/pop_growth_sampled_mu_diff_sites.py
+python population_model/sampled_muts.py
+python population_model/der_allele_sum_per_site.py
+python population_model/input_miss_rows.py
+```
+
+A typical SMFS estimation workflow is:
+
+```bash
+python smfs/estimate_lambda_mew_updated.py
+python smfs/estimate_lambda_mew_sd_updtaed.py
+python smfs/est_smfs_num.py
+```
+
+Use `smfs/matching_mut_rate_simple.py` when preparing SFS data that needs to be matched to mutation-rate metadata before estimation.
 
 ## Input Data
 
 The analysis relies on:
 
-* Simulation outputs mimicking human genome variation under varying mutation rates.
-* Tabulated mutation-specific metadata including sampled mutation rates, methylation level, and context.
+* Simulation outputs from the population-model scripts.
+* Tabulated mutation-specific metadata, including mutation rates, methylation level, sequence context, mean theta, and standard deviation of theta.
+* SFS or allele-count summaries with site-count information.
 
-> **Note**: The original data files are not included here due to size constraints. You may contact the authors or refer to the associated publication to access the input data, or use mock datasets for testing.
+The original data files are not included in this repository due to size and project-specific storage constraints.
 
-## Usage
+## Requirements
 
-These scripts are standalone and may be run with Python 3.8+ and the following libraries:
+The scripts use Python 3 and the following third-party libraries:
 
 ```bash
 pip install numpy pandas scipy matplotlib
 ```
 
-Each script can be run as a top-level program. Paths to data files must be updated or mocked as appropriate for your environment.
-
-Example (estimating lambda):
-
-```bash
-python estimate_lambda_mew.py
-```
-
-Example (inferring SMFS numerically):
-
-```bash
-python est_smfs_num.py
-```
-
-Example (MLE approach to SFS fitting):
-
-```bash
-python est_smfs_log_lik.py
-```
+The project dependencies are also listed in `pyproject.toml`.
 
 ## Output
 
-* CSV tables of predicted allele count frequencies.
-* Tabulated lambda estimates per dataset.
-* Intermediate files with predicted number of unique mutations per count.
+Depending on which scripts are run, outputs include:
 
-These are useful for:
-
-* Regression testing simulation pipelines.
-* Comparing observed versus expected SFS.
-* Plotting model fits in publication figures.
+* Simulated mutation-rate tables.
+* Sampled mutation records.
+* Per-site derived-allele summaries.
+* Lambda estimates.
+* Expected counts of sites with each number of unique mutations.
+* Predicted SMFS probability tables.
+* Diagnostic plots for sampled mutation-rate checks.
 
 ## Citation
 
 If you use this code for your research, please cite:
 
-> \[Author Names]. *Estimating recurrent mutation probabilities in allele frequency spectra from human population data.* \[Journal], \[Year], \[DOI].
+> [Author Names]. *Estimating recurrent mutation probabilities in allele frequency spectra from human population data.* [Journal], [Year], [DOI].
 
 ## License
 
