@@ -13,8 +13,8 @@ from scipy.stats import nbinom
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
 INPUT_FILE = "sfs_genes_dist.csv.gz"
 OUTPUT_DIR = INPUT_DIR
-OUTPUT_LAMBDA_FILE = "lam_mu_sd_josh.csv"
-SAVE_LAMBDA_OUTPUT = False
+OUTPUT_XI_FILE = "lam_mu_sd_josh.csv"
+SAVE_XI_OUTPUT = False
 
 # Column names
 SITES_COL = "Sites"
@@ -23,7 +23,7 @@ SD_COL = "SD theta"
 AC_COL = "AC_nfe_down"
 
 # Model settings
-INITIAL_LAMBDA = 1e3
+INITIAL_XI = 1e3
 UNIQUE_MUTATION_LIMIT = 300
 OUTPUT_UNIQUE_MUTATION_FILE = f"unq_mut_sites_{UNIQUE_MUTATION_LIMIT}_josh_mew_sd.csv"
 OPTIMIZER_METHOD = "nelder-mead"
@@ -33,20 +33,20 @@ EPS = 1e-12
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 
-def p0(lam, mu, sig):
+def p0(xi, mu, sig):
     """Probability of zero mutational events under the negative-binomial marginal."""
     mu = np.asarray(mu)
     sig = np.asarray(sig)
 
     mu_sig_sq = (mu / sig) ** 2
-    return np.exp(-mu_sig_sq * np.log(1 + (lam * mu) / mu_sig_sq))
+    return np.exp(-mu_sig_sq * np.log(1 + (xi * mu) / mu_sig_sq))
 
 
-def neg_loglik(log_lam, mu_seg, mu_non, sig_seg, sig_non):
-    lam = np.exp(log_lam)
+def neg_loglik(log_xi, mu_seg, mu_non, sig_seg, sig_non):
+    xi = np.exp(log_xi)
 
-    p0_non = p0(lam, mu_non, sig_non)
-    p0_seg = p0(lam, mu_seg, sig_seg)
+    p0_non = p0(xi, mu_non, sig_non)
+    p0_seg = p0(xi, mu_seg, sig_seg)
 
     p0_non = np.clip(p0_non, EPS, 1 - EPS)
     p0_seg = np.clip(p0_seg, EPS, 1 - EPS)
@@ -81,18 +81,18 @@ def main():
 
     res = minimize(
         neg_loglik,
-        x0=np.log([INITIAL_LAMBDA]),
+        x0=np.log([INITIAL_XI]),
         args=(mu_seg, mu_non, sig_seg, sig_non),
         method=OPTIMIZER_METHOD,
         options=OPTIMIZER_OPTIONS,
     )
 
-    lam_hat = float(np.exp(res.x[0]))
-    print(f"Estimated lambda: {lam_hat:}")
+    xi_hat = float(np.exp(res.x[0]))
+    print(f"Estimated xi: {xi_hat:}")
 
-    lam_df = pd.DataFrame([{"Lambda": lam_hat}])
-    if SAVE_LAMBDA_OUTPUT:
-        lam_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_LAMBDA_FILE), index=False)
+    xi_df = pd.DataFrame([{"Lambda": xi_hat}])
+    if SAVE_XI_OUTPUT:
+        xi_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_XI_FILE), index=False)
 
     df1 = pd.DataFrame()
     stop_filling = False
@@ -106,7 +106,7 @@ def main():
             data_df[col_name] = nbinom.pmf(
                 unq_mut,
                 n=(data_df[MEAN_COL] / data_df[SD_COL]) ** 2,
-                p=1 / (1 + data_df[SD_COL] ** 2 * (lam_hat / data_df[MEAN_COL])),
+                p=1 / (1 + data_df[SD_COL] ** 2 * (xi_hat / data_df[MEAN_COL])),
             )
 
             poi_sum = data_df[col_name].sum()

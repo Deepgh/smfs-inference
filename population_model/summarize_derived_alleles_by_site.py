@@ -15,7 +15,7 @@ OUTPUT_FILE = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
 # Column names
 SITE_COL = "Site"
 MUTATION_ID_COL = "Mutation id"
-METH_LEVEL_COL = "Meth level"
+METHYLATION_LEVEL_COL = "Meth level"
 MUTATION_RATE_COL = "Mutation rate"
 MUTATION_NUMBER_COL = "Mutation number"
 MEAN_THETA_COL = "Mean theta"
@@ -29,22 +29,22 @@ warnings.filterwarnings("ignore")
 def single_iteration(group):
     site = group[SITE_COL].iloc[0]
     unq_mut = len(group[MUTATION_ID_COL].unique())
-    meth_level = group[METH_LEVEL_COL].iloc[0]
+    methylation_level = group[METHYLATION_LEVEL_COL].iloc[0]
     mut_rate = group[MUTATION_RATE_COL].iloc[0]
     mut_num = group[MUTATION_NUMBER_COL].iloc[0]
-    mew_gamma = group[MEAN_THETA_COL].iloc[0]
+    mean_theta = group[MEAN_THETA_COL].iloc[0]
     sd_gamma = group[SD_THETA_COL].iloc[0]
-    smp_mew = group[SAMPLED_MU_COL].iloc[0]
+    sampled_mu = group[SAMPLED_MU_COL].iloc[0]
     mut_sum = group[SAMPLED_MUTATION_COL].sum()
 
     return {
         "Mutation number": mut_num,
         "Site": site,
         "Mutation rate": mut_rate,
-        "Mew theta": mew_gamma,
+        "Mew theta": mean_theta,
         "SD theta": sd_gamma,
-        "Sampled mu": smp_mew,
-        "Meth level": meth_level,
+        "Sampled mu": sampled_mu,
+        "Meth level": methylation_level,
         "Sampled mutation sum": mut_sum,
         "Unique mutations": unq_mut,
     }

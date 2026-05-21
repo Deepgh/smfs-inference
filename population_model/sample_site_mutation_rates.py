@@ -28,7 +28,7 @@ GAMMA_SCALE_COL = "theta"
 SEED_COL = "seed"
 NUM_SITES_COL = "num_sites"
 MU_GNOMAD_COL = "mu_gnomad"
-METHYLATION_COL = "methylation_level"
+METHYLATION_LEVEL_COL = "methylation_level"
 SAMPLED_MU_COL = "sampled mu"
 SAMPLED_SD_COL = "sampled sd"
 DIFF_COL = "diff"
@@ -39,7 +39,7 @@ MUTATION_NUMBER_OUT_COL = "Mutation number"
 MUTATION_RATE_OUT_COL = "Mutation rate"
 MEAN_THETA_OUT_COL = "Mean theta"
 SD_THETA_OUT_COL = "SD theta"
-METH_LEVEL_OUT_COL = "Meth_level"
+METHYLATION_LEVEL_OUT_COL = "Meth_level"
 SAMPLED_MU_OUT_COL = "Sampled mu"
 
 # Sampling and diagnostic settings
@@ -92,7 +92,7 @@ def write_expanded_site_rates(df):
                 MUTATION_RATE_OUT_COL: [row[MU_GNOMAD_COL]] * n,
                 MEAN_THETA_OUT_COL: [row[MEAN_THETA_COL]] * n,
                 SD_THETA_OUT_COL: [row[SD_THETA_COL]] * n,
-                METH_LEVEL_OUT_COL: [row[METHYLATION_COL]] * n,
+                METHYLATION_LEVEL_OUT_COL: [row[METHYLATION_LEVEL_COL]] * n,
                 SAMPLED_MU_OUT_COL: samples,
             }
         )

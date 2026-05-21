@@ -14,7 +14,7 @@ from scipy.stats import poisson
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
 INPUT_FILE = "edited_sim_data_smp_mu_diff_site.csv.gz"
 OUTPUT_DIR = INPUT_DIR
-OUTPUT_LAMBDA_FILE = "lam_smp_mu.csv"
+OUTPUT_XI_FILE = "lam_smp_mu.csv"
 
 # Column names
 SITE_COL = "Site"
@@ -22,7 +22,7 @@ MU_COL = "Sampled mu"
 AC_COL = "AC"
 
 # Model settings
-INITIAL_LAMBDA = 1e3
+INITIAL_XI = 1e3
 UNIQUE_MUTATION_LIMIT = 300
 OUTPUT_UNIQUE_MUTATION_FILE = f"unq_mut_sites_{UNIQUE_MUTATION_LIMIT}_sim_smp_mu.csv"
 OPTIMIZER_METHOD = "nelder-mead"
@@ -32,14 +32,14 @@ EPS = 1e-12
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 
-def estimate(log_lam, mu_seg, mu_non_seg):
+def estimate(log_xi, mu_seg, mu_non_seg):
     """Negative log-likelihood for the Poisson mutation-rate model."""
-    lam_val = np.exp(log_lam)
+    xi_val = np.exp(log_xi)
 
-    p_seg = np.exp(-lam_val * mu_seg)
+    p_seg = np.exp(-xi_val * mu_seg)
     p_seg = np.clip(p_seg, EPS, 1 - EPS)
 
-    p_non = np.exp(-lam_val * mu_non_seg)
+    p_non = np.exp(-xi_val * mu_non_seg)
     p_non = np.clip(p_non, EPS, 1 - EPS)
 
     log_lik = np.sum(np.log(p_non)) + np.sum(np.log(1 - p_seg))
@@ -64,19 +64,19 @@ def main():
 
     res = minimize(
         estimate,
-        np.log([INITIAL_LAMBDA]),
+        np.log([INITIAL_XI]),
         method=OPTIMIZER_METHOD,
         args=(mu_seg, mu_non_seg),
         options=OPTIMIZER_OPTIONS,
     )
 
-    lambda_est = float(np.exp(res.x[0]))
-    print("Estimated lambda:", lambda_est)
+    xi_est = float(np.exp(res.x[0]))
+    print("Estimated xi:", xi_est)
 
-    lam_val = pd.DataFrame([{"Lambda": lambda_est}])
-    lam_val.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_LAMBDA_FILE), index=False)
+    xi_df = pd.DataFrame([{"Lambda": xi_est}])
+    xi_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_XI_FILE), index=False)
 
-    lambd = float(math.exp(res.x[0]))
+    xi = float(math.exp(res.x[0]))
     df1 = pd.DataFrame()
     stop_filling = False
 
@@ -84,7 +84,7 @@ def main():
         print(unq_mut)
         if not stop_filling:
             col_name = f"Unq muts sites_{unq_mut}"
-            data_df[col_name] = poisson.pmf(unq_mut, lambd * data_df[MU_COL])
+            data_df[col_name] = poisson.pmf(unq_mut, xi * data_df[MU_COL])
             poi_sum = sum(data_df[col_name])
             print(poi_sum)
 

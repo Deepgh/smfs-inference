@@ -14,7 +14,7 @@ SAVE_OUTPUT = False
 # Column names
 REF_CONTEXT_COL = "ref_context"
 ALT_CONTEXT_COL = "alt_context"
-METHYLATION_COL = "methylation_level"
+METHYLATION_LEVEL_COL = "methylation_level"
 SITES_COL = "Sites"
 MUTATION_SUM_COL = "mut_sum"
 
@@ -22,17 +22,17 @@ MUTATION_SUM_COL = "mut_sum"
 MUTATION_RATE_COLUMNS = [
     REF_CONTEXT_COL,
     ALT_CONTEXT_COL,
-    METHYLATION_COL,
+    METHYLATION_LEVEL_COL,
     "mu_gnomad",
     "mean_theta",
     "sd_theta",
     "error",
 ]
 
-TRIPLET_KEY = [REF_CONTEXT_COL, ALT_CONTEXT_COL, METHYLATION_COL]
+TRIPLET_KEY = [REF_CONTEXT_COL, ALT_CONTEXT_COL, METHYLATION_LEVEL_COL]
 
 RENAME_COLUMNS = {
-    METHYLATION_COL: "Meth level",
+    METHYLATION_LEVEL_COL: "Meth level",
     "mu_gnomad": "Mew",
     "mean_theta": "Mean theta",
     "sd_theta": "SD theta",
@@ -50,7 +50,7 @@ def swap_first_third(seq):
 
 def main():
     sfs_df = pd.read_csv(SFS_FILE, compression="gzip")
-    sfs_df[METHYLATION_COL] = sfs_df[METHYLATION_COL].fillna(0).astype(int)
+    sfs_df[METHYLATION_LEVEL_COL] = sfs_df[METHYLATION_LEVEL_COL].fillna(0).astype(int)
 
     sfs_grouped = (
         sfs_df

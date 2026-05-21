@@ -21,8 +21,8 @@ MUTATION_NUMBER_COL = "Mutation number"
 MUTATION_RATE_COL = "Mutation rate"
 MEAN_THETA_COL = "Mean theta"
 SD_THETA_COL = "SD theta"
-METH_LEVEL_COL = "Meth level"
-INPUT_METH_LEVEL_COL = "Meth_level"
+METHYLATION_LEVEL_COL = "Meth level"
+INPUT_METHYLATION_LEVEL_COL = "Meth_level"
 SAMPLED_MU_COL = "Sampled mu"
 ALLELE_COPIES_COL = "Allele copies"
 MUTATION_ID_COL = "Mutation id"
@@ -38,8 +38,8 @@ RANDOM_SEED_RANGE = 2 * 10**7
 pd.options.mode.chained_assignment = None
 
 
-def get_sample(dist: str, lambdaa: float) -> float:
-    return np.random.poisson(lambdaa) if dist == "poisson" else np.random.normal(lambdaa, np.sqrt(lambdaa))
+def get_sample(dist: str, xi: float) -> float:
+    return np.random.poisson(xi) if dist == "poisson" else np.random.normal(xi, np.sqrt(xi))
 
 
 def extract_row_data(row):
@@ -48,19 +48,19 @@ def extract_row_data(row):
         MUTATION_RATE_COL: row[MUTATION_RATE_COL],
         MEAN_THETA_COL: row[MEAN_THETA_COL],
         SD_THETA_COL: row[SD_THETA_COL],
-        METH_LEVEL_COL: row[INPUT_METH_LEVEL_COL],
+        METHYLATION_LEVEL_COL: row[INPUT_METHYLATION_LEVEL_COL],
         SAMPLED_MU_COL: row[SAMPLED_MU_COL],
     }
 
 
-def simulate_mutations_over_time(time_scale, lambdaa, initial_population, smp_mew, mutid_start):
+def simulate_mutations_over_time(time_scale, xi, initial_population, sampled_mu, mutid_start):
     current_population = initial_population
     mutation_data = []
     results = []
     mutid = mutid_start
 
     for t in reversed(range(1, time_scale + 1)):
-        theta = 2 * current_population * smp_mew
+        theta = 2 * current_population * sampled_mu
         m = np.random.poisson(theta)
 
         for _ in range(m):
@@ -68,7 +68,7 @@ def simulate_mutations_over_time(time_scale, lambdaa, initial_population, smp_me
             mutid += 1
 
         for mut in mutation_data:
-            rate = lambdaa * mut[0]
+            rate = xi * mut[0]
             dist = "poisson" if rate < NORMAL_APPROXIMATION_THRESHOLD else "normal"
             mut[0] = get_sample(dist, rate)
 
@@ -78,7 +78,7 @@ def simulate_mutations_over_time(time_scale, lambdaa, initial_population, smp_me
             for mut in mutation_data:
                 results.append((mut[0], mut[3]))
 
-        current_population *= lambdaa
+        current_population *= xi
 
     return results
 
@@ -89,15 +89,15 @@ def single_iteration(args):
 
     data = extract_row_data(row)
     time_scale = math.ceil(TIME_SCALE_MULTIPLIER * math.log10(FINAL_POPULATION / INITIAL_POPULATION))
-    lambdaa = (FINAL_POPULATION / INITIAL_POPULATION) ** (1 / time_scale)
+    xi = (FINAL_POPULATION / INITIAL_POPULATION) ** (1 / time_scale)
 
     df_muts_rate = pd.DataFrame([{SITE_COL: iter_index, **data}])
 
     sim_results = simulate_mutations_over_time(
         time_scale=time_scale,
-        lambdaa=lambdaa,
+        xi=xi,
         initial_population=INITIAL_POPULATION,
-        smp_mew=data[SAMPLED_MU_COL],
+        sampled_mu=data[SAMPLED_MU_COL],
         mutid_start=0,
     )
 
