@@ -1,47 +1,57 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 24 18:15:18 2025
 
-Author: ghosh1
-"""
+import math
+import multiprocessing
+import os
+from random import randrange
 
 import numpy as np
 import pandas as pd
-import multiprocessing
-import os
-import math
-from random import randrange
 
-# constants
-initial_pop =  10**4
-final_pop =  10**8
+# Paths and files
+INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+INPUT_FILE = "scaled_mu_diff_site.csv"
+OUTPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+OUTPUT_FILE = "der_allel_gamma_smp_mu_diff_site.csv"
+MUTATION_RATE_OUTPUT_FILE = "mut_rates_gamma_smp_diff_site.csv"
 
-# file paths
-data_path = '/project/yuvalsim/Deep/project2/josh_full_data/error_data/'
-muts_file = 'scaled_mu_diff_site.csv'
-scaled_mu_file = os.path.join(data_path, muts_file)
+# Column names
+SITE_COL = "Site"
+MUTATION_NUMBER_COL = "Mutation number"
+MUTATION_RATE_COL = "Mutation rate"
+MEAN_THETA_COL = "Mean theta"
+SD_THETA_COL = "SD theta"
+METH_LEVEL_COL = "Meth level"
+INPUT_METH_LEVEL_COL = "Meth_level"
+SAMPLED_MU_COL = "Sampled mu"
+ALLELE_COPIES_COL = "Allele copies"
+MUTATION_ID_COL = "Mutation id"
 
-output_dir = '/project/yuvalsim/Deep/project2/josh_full_data/error_data/'
-output_file = 'der_allel_gamma_smp_mu_diff_site.csv'
-mut_rate_file = 'mut_rates_gamma_smp_diff_site.csv'
+# Population model settings
+INITIAL_POPULATION = 10**4
+FINAL_POPULATION = 10**8
+TIME_SCALE_MULTIPLIER = 250
+NORMAL_APPROXIMATION_THRESHOLD = 10**9
+RANDOM_SEED_MODULUS = 123456789123456
+RANDOM_SEED_RANGE = 2 * 10**7
 
-# read mutation data
-sampled_mu_df = pd.read_csv(scaled_mu_file)
 pd.options.mode.chained_assignment = None
 
 
 def get_sample(dist: str, lambdaa: float) -> float:
-    return np.random.poisson(lambdaa) if dist == 'poisson' else np.random.normal(lambdaa, np.sqrt(lambdaa))
+    return np.random.poisson(lambdaa) if dist == "poisson" else np.random.normal(lambdaa, np.sqrt(lambdaa))
 
 
 def extract_row_data(row):
-    return {'Mutation number': row['Mutation number'],
-        'Mutation rate': row['Mutation rate'],
-        'Mean theta': row['Mean theta'],
-        'SD theta': row['SD theta'],
-        'Meth level': row['Meth_level'],
-        'Sampled mu': row['Sampled mu'] }
+    return {
+        MUTATION_NUMBER_COL: row[MUTATION_NUMBER_COL],
+        MUTATION_RATE_COL: row[MUTATION_RATE_COL],
+        MEAN_THETA_COL: row[MEAN_THETA_COL],
+        SD_THETA_COL: row[SD_THETA_COL],
+        METH_LEVEL_COL: row[INPUT_METH_LEVEL_COL],
+        SAMPLED_MU_COL: row[SAMPLED_MU_COL],
+    }
+
 
 def simulate_mutations_over_time(time_scale, lambdaa, initial_population, smp_mew, mutid_start):
     current_population = initial_population
@@ -54,79 +64,82 @@ def simulate_mutations_over_time(time_scale, lambdaa, initial_population, smp_me
         m = np.random.poisson(theta)
 
         for _ in range(m):
-            mutation_data.append([1, t, 'dist', mutid])
+            mutation_data.append([1, t, "dist", mutid])
             mutid += 1
 
         for mut in mutation_data:
             rate = lambdaa * mut[0]
-            dist = 'poisson' if rate < 10**9 else 'normal'
+            dist = "poisson" if rate < NORMAL_APPROXIMATION_THRESHOLD else "normal"
             mut[0] = get_sample(dist, rate)
 
         mutation_data = [m for m in mutation_data if m[0] != 0]
 
         if t == 1:
             for mut in mutation_data:
-                results.append((mut[0], mut[3]))  # (allele copies, mutid)
+                results.append((mut[0], mut[3]))
 
         current_population *= lambdaa
 
     return results
 
 
-def single_iteration(iter_index: int):
-    
-    np.random.seed((randrange(2 * 10**7) + os.getpid()) % 123456789123456)
+def single_iteration(args):
+    iter_index, row = args
+    np.random.seed((randrange(RANDOM_SEED_RANGE) + os.getpid()) % RANDOM_SEED_MODULUS)
 
-
-    row = sampled_mu_df.iloc[iter_index]
     data = extract_row_data(row)
+    time_scale = math.ceil(TIME_SCALE_MULTIPLIER * math.log10(FINAL_POPULATION / INITIAL_POPULATION))
+    lambdaa = (FINAL_POPULATION / INITIAL_POPULATION) ** (1 / time_scale)
 
-    time_scale = math.ceil(250 * math.log10(final_pop / initial_pop))
-    lambdaa = (final_pop / initial_pop) ** (1 / time_scale)
-
-    df_muts_rate = pd.DataFrame([{
-        'Site': iter_index,
-        **data}])
+    df_muts_rate = pd.DataFrame([{SITE_COL: iter_index, **data}])
 
     sim_results = simulate_mutations_over_time(
         time_scale=time_scale,
         lambdaa=lambdaa,
-        initial_population=initial_pop,
-        smp_mew=data['Sampled mu'],
-        mutid_start=0
+        initial_population=INITIAL_POPULATION,
+        smp_mew=data[SAMPLED_MU_COL],
+        mutid_start=0,
     )
 
-    final_data = [{
-        'Site': iter_index,
-        **data,
-        'Allele copies': allele_copies,
-        'Mutation id': mutid
-    } for allele_copies, mutid in sim_results]
+    final_data = [
+        {
+            SITE_COL: iter_index,
+            **data,
+            ALLELE_COPIES_COL: allele_copies,
+            MUTATION_ID_COL: mutid,
+        }
+        for allele_copies, mutid in sim_results
+    ]
 
     return pd.DataFrame(final_data), df_muts_rate
 
 
-def main():
-    os.makedirs(output_dir, exist_ok=True)
+def move_column_first(df, column):
+    if column not in df.columns:
+        return df
 
-    num_cores = int(os.environ.get('SLURM_CPUS_PER_TASK', multiprocessing.cpu_count()))
-    run_range = len(sampled_mu_df)
+    cols = [column] + [col for col in df.columns if col != column]
+    return df[cols]
+
+
+def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    sampled_mu_df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))
+    run_items = list(sampled_mu_df.iterrows())
+    num_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
 
     with multiprocessing.Pool(num_cores) as pool:
-        results = pool.map(single_iteration, range(run_range))
+        results = pool.map(single_iteration, run_items)
 
-    df_results = pd.concat([r[0] for r in results], ignore_index=True).sort_values(by='Site')
-    df_rates = pd.concat([r[1] for r in results], ignore_index=True).sort_values(by='Site')
-    
-    if 'Mutation number' in df_results.columns:
-        cols = ['Mutation number'] + [col for col in df_results.columns if col != 'Mutation number']
-        df_results = df_results[cols]
-    if 'Mutation number' in df_results.columns:
-        cols = ['Mutation number'] + [col for col in df_rates.columns if col != 'Mutation number']
-        df_rates = df_rates[cols]
-        
-    df_results.to_csv(os.path.join(output_dir, output_file), index=False)
-    df_rates.to_csv(os.path.join(output_dir, mut_rate_file), index=False)
+    df_results = pd.concat([r[0] for r in results], ignore_index=True).sort_values(by=SITE_COL)
+    df_rates = pd.concat([r[1] for r in results], ignore_index=True).sort_values(by=SITE_COL)
+
+    df_results = move_column_first(df_results, MUTATION_NUMBER_COL)
+    df_rates = move_column_first(df_rates, MUTATION_NUMBER_COL)
+
+    df_results.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)
+    df_rates.to_csv(os.path.join(OUTPUT_DIR, MUTATION_RATE_OUTPUT_FILE), index=False)
 
 
 if __name__ == "__main__":

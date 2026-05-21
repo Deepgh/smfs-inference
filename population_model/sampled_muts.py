@@ -1,30 +1,42 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Feb  9 10:41:22 2024
 
-@author: ghosh1
-"""
+import os
 
 import pandas as pd
 from scipy.stats import hypergeom
-import os
+
+# Paths and files
+INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+INPUT_FILE = "der_allel_gamma_smp_mu_diff_site.csv"
+OUTPUT_DIR = os.path.join(INPUT_DIR, "sampled_data")
+OUTPUT_FILE = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+
+# Column names
+ALLELE_COPIES_COL = "Allele copies"
+SAMPLED_MUTATION_COL = "Sampled mutation"
+
+# Sampling settings
+FINAL_POPULATION = 2 * (10**8)
+SAMPLE_SIZE = 2 * 5 * (10**5)
 
 
-path =  '/project/yuvalsim/Deep/project2/josh_full_data/error_data/'
-file = 'der_allel_gamma_smp_mu_diff_site.csv'
+def main():
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-output_dir = os.path.join(path,'sampled_data')
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-df = pd.read_csv(os.path.join(path,file))
+    df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))
+    df[SAMPLED_MUTATION_COL] = hypergeom.rvs(
+        FINAL_POPULATION,
+        df[ALLELE_COPIES_COL],
+        SAMPLE_SIZE,
+    )
 
-pop_final = 2*(10**8)
+    df_sampled = df[df[SAMPLED_MUTATION_COL] != 0]
+    df_sampled.to_csv(
+        os.path.join(OUTPUT_DIR, OUTPUT_FILE),
+        compression="gzip",
+        index=False,
+    )
 
-sample_size = 2*5*(10**5)
-df['Sampled mutation'] = hypergeom.rvs(pop_final, df['Allele copies'], sample_size)
 
-df_sampled =df[df['Sampled mutation'] !=0]
-        
-df_sampled.to_csv(os.path.join(output_dir, 'samp_data_10_5_5_smp_mu_diff_site.csv.gz'),compression='gzip', index=False)
-    
+if __name__ == "__main__":
+    main()
