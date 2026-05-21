@@ -1,5 +1,5 @@
 # This config preserves the original paths, filenames, column names, and defaults
-# that are hard-coded in the scripts used when producing results for publicaiton.
+# that are hard-coded in the scripts used when producing results for publication.
 
 [smfs.match_sfs_to_mutation_rates]
 sfs_file = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_syn_ac_1M.csv.gz"
@@ -21,7 +21,7 @@ mean_theta_out_col = "Mean theta"
 sd_theta_out_col = "SD theta"
 error_out_col = "Error"
 
-[smfs.estimate_lambda_poisson]
+[smfs.estimate_xi_poisson]
 input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
 input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
 output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
@@ -35,7 +35,7 @@ output_unique_mutation_file = "unq_mut_sites_300_sim_smp_mu.csv"
 optimizer_method = "nelder-mead"
 eps = 0.000000000001
 
-[smfs.estimate_lambda_negative_binomial]
+[smfs.estimate_xi_negative_binomial]
 input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
 input_file = "sfs_genes_dist.csv.gz"
 output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
@@ -94,7 +94,7 @@ methylation_level_out_col = "Meth_level"
 sampled_mu_out_col = "Sampled mu"
 random_seed_max = 1000000000
 diagnostic_sample_size = 100000
-show_diagnostic_plots = true
+show_diagnostic_plots = false
 write_diagnostic_output = true
 
 [population_model.simulate_population_growth_mutations]

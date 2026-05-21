@@ -7,7 +7,7 @@ The tables below describe the *meaning* of each required input column, the confi
 For example:
 
 ```toml
-[smfs.estimate_lambda_poisson]
+[smfs.estimate_xi_poisson]
 mu_col = "my_sampled_mu_column"
 ac_col = "allele_count"
 ```
@@ -56,7 +56,7 @@ Output:
 
 Output column names are controlled by `methylation_level_out_col`, `mu_out_col`, `mean_theta_out_col`, `sd_theta_out_col`, and `error_out_col`.
 
-### `smfs/estimate_lambda_poisson.py`
+### `smfs/estimate_xi_poisson.py`
 
 Estimates xi using a Poisson model with site-specific sampled mutation rates.
 
@@ -81,7 +81,7 @@ Outputs:
 | `output_xi_file` | CSV with the estimated xi value. The output column is currently named `Lambda` for compatibility. |
 | `output_unique_mutation_file` | CSV with expected site counts by unique-mutation count. Columns are currently `Unique mutation` and `Unq muts sites`. |
 
-### `smfs/estimate_lambda_negative_binomial.py`
+### `smfs/estimate_xi_negative_binomial.py`
 
 Estimates xi while accounting for mean and standard deviation uncertainty using a negative-binomial marginal model.
 

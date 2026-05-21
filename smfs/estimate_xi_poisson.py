@@ -14,7 +14,7 @@ from scipy.stats import poisson
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from workflow_config import apply_config
 
-CONFIG_SECTION = "smfs.estimate_lambda_poisson"
+CONFIG_SECTION = "smfs.estimate_xi_poisson"
 
 # Paths and files
 INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"

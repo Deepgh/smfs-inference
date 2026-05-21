@@ -1,7 +1,7 @@
 # Copy this file and edit paths/settings for your environment.
 # Example:
 #   cp configs/template.toml configs/my_analysis.toml
-#   python smfs/estimate_lambda_poisson.py --config configs/my_analysis.toml
+#   python smfs/estimate_xi_poisson.py --config configs/my_analysis.toml
 
 [smfs.match_sfs_to_mutation_rates]
 sfs_file = "data/sfs_syn_ac_1M.csv.gz"
@@ -9,7 +9,7 @@ mutation_rate_file = "data/ajhg_00004094_supp_table2_mut.tsv"
 output_file = "results/sfs_per_site_missense_ac_1M.csv.gz"
 save_output = true
 
-[smfs.estimate_lambda_poisson]
+[smfs.estimate_xi_poisson]
 input_dir = "results"
 input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
 output_dir = "results"
@@ -18,7 +18,7 @@ initial_xi = 1000.0
 unique_mutation_limit = 300
 output_unique_mutation_file = "unq_mut_sites_300_sim_smp_mu.csv"
 
-[smfs.estimate_lambda_negative_binomial]
+[smfs.estimate_xi_negative_binomial]
 input_dir = "data"
 input_file = "sfs_genes_dist.csv.gz"
 output_dir = "results"

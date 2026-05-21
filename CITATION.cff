@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated manuscript using the metadata below."
+title: "Accounting for recurrent mutation in the frequency spectrum of rare alleles"
+version: "1.0.0"
+date-released: "2026-05-21"
+license: MIT
+repository-code: "https://github.com/Deepgh/smfs-inference"
+abstract: "Software accompanying the manuscript Accounting for recurrent mutation in the frequency spectrum of rare alleles. The code supports simulation of recurrent mutations, estimation of the single mutation frequency spectrum (SMFS), and analysis of rare-allele site frequency spectra under recurrent mutation."
+authors:
+  - family-names: "Ghosh"
+    given-names: "Deepjyoti"
+    affiliation: "Section of Genetic Medicine, Department of Medicine, University of Chicago, IL, USA"
+  - family-names: "Williams"
+    given-names: "Kyle"
+    affiliation: "Department of Mathematics, University of Houston, Houston, TX, USA"
+  - family-names: "Schraiber"
+    given-names: "Joshua"
+    affiliation: "Department of Quantitative and Computational Biology, University of Southern California, Los Angeles, CA, USA"
+  - family-names: "Simons"
+    given-names: "Yuval"
+    affiliation: "Section of Genetic Medicine, Department of Medicine, University of Chicago, IL, USA; Department of Human Genetics, University of Chicago, Chicago, IL, USA"

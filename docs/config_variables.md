@@ -3,7 +3,7 @@
 Scripts can be run with an optional TOML config file:
 
 ```bash
-python smfs/estimate_lambda_poisson.py --config configs/template.toml
+python smfs/estimate_xi_poisson.py --config configs/template.toml
 ```
 
 If `--config` is not provided, each script uses the constants defined at the top of the script. The file `configs/current_behavior.toml` preserves the original hard-coded behavior. The file `configs/template.toml` is intended as a user-editable starting point.
@@ -40,7 +40,7 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 | `sd_theta_out_col` | Output standard-deviation theta column. |
 | `error_out_col` | Output error column. |
 
-## `smfs.estimate_lambda_poisson`
+## `smfs.estimate_xi_poisson`
 
 | Variable | Description |
 | --- | --- |
@@ -57,7 +57,7 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 | `optimizer_method` | SciPy optimizer method. |
 | `eps` | Numerical clipping value used for likelihood stability. |
 
-## `smfs.estimate_lambda_negative_binomial`
+## `smfs.estimate_xi_negative_binomial`
 
 | Variable | Description |
 | --- | --- |
