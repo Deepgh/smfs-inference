@@ -23,9 +23,9 @@ OUTPUT_DIR = INPUT_DIR
 OUTPUT_XI_FILE = "xi_poisson.csv"
 
 # Column names
-SITE_COL = "Site"
-MU_COL = "Sampled mu"
-AC_COL = "AC"
+SITE_COL = "site"
+MU_COL = "sampled_mu"
+AC_COL = "allele_count"
 
 # Model settings
 INITIAL_XI = 1e3
@@ -73,7 +73,7 @@ def main(data_df):
 
     xi_est = float(np.exp(res.x[0]))
 
-    xi_df = pd.DataFrame([{"Lambda": xi_est}])
+    xi_df = pd.DataFrame([{"xi": xi_est}])
 
     xi = float(math.exp(res.x[0]))
     unique_mutation_rows = []
@@ -81,7 +81,7 @@ def main(data_df):
 
     for unq_mut in range(UNIQUE_MUTATION_LIMIT + 1):
         if not stop_filling:
-            col_name = f"Unq muts sites_{unq_mut}"
+            col_name = f"unique_mutation_sites_{unq_mut}"
             data_df[col_name] = poisson.pmf(unq_mut, xi * data_df[MU_COL])
             poi_sum = sum(data_df[col_name])
 
@@ -91,7 +91,7 @@ def main(data_df):
             poi_sum = 0
 
         unique_mutation_rows.append(
-            {"Unique mutation": unq_mut, "Unq muts sites": poi_sum}
+            {"unique_mutation": unq_mut, "unique_mutation_sites": poi_sum}
         )
 
     unique_mutation_df = pd.DataFrame(unique_mutation_rows)

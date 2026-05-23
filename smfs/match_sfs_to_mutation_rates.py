@@ -20,18 +20,18 @@ SAVE_OUTPUT = False
 REF_CONTEXT_COL = "ref_context"
 ALT_CONTEXT_COL = "alt_context"
 METHYLATION_LEVEL_COL = "methylation_level"
-SITES_COL = "Sites"
+SITES_COL = "sites"
 MUTATION_SUM_COL = "mut_sum"
 
 MU_GNOMAD_COL = "mu_gnomad"
 MEAN_THETA_COL = "mean_theta"
 SD_THETA_COL = "sd_theta"
 ERROR_COL = "error"
-METHYLATION_LEVEL_OUT_COL = "Meth level"
-MU_OUT_COL = "Mew"
-MEAN_THETA_OUT_COL = "Mean theta"
-SD_THETA_OUT_COL = "SD theta"
-ERROR_OUT_COL = "Error"
+METHYLATION_LEVEL_OUT_COL = "methylation_level"
+MU_OUT_COL = "mutation_rate"
+MEAN_THETA_OUT_COL = "mean_theta"
+SD_THETA_OUT_COL = "sd_theta"
+ERROR_OUT_COL = "error"
 
 
 def complement(seq):

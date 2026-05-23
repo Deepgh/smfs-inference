@@ -23,10 +23,10 @@ OUTPUT_XI_FILE = "xi_negative_binomial.csv"
 SAVE_XI_OUTPUT = False
 
 # Column names
-SITES_COL = "Sites"
-MEAN_COL = "Mean theta"
-SD_COL = "SD theta"
-AC_COL = "AC_nfe_down"
+SITES_COL = "sites"
+MEAN_COL = "mean_theta"
+SD_COL = "sd_theta"
+AC_COL = "allele_count"
 
 # Model settings
 INITIAL_XI = 1e3
@@ -90,14 +90,14 @@ def main(data_df):
 
     xi_hat = float(np.exp(res.x[0]))
 
-    xi_df = pd.DataFrame([{"Lambda": xi_hat}])
+    xi_df = pd.DataFrame([{"xi": xi_hat}])
 
     unique_mutation_rows = []
     stop_filling = False
 
     for unq_mut in range(UNIQUE_MUTATION_LIMIT + 1):
         if not stop_filling:
-            col_name = f"Unq muts sites_{unq_mut}"
+            col_name = f"unique_mutation_sites_{unq_mut}"
 
             data_df[col_name] = nbinom.pmf(
                 unq_mut,
@@ -113,7 +113,7 @@ def main(data_df):
             poi_sum = 0
 
         unique_mutation_rows.append(
-            {"Unique mutation": unq_mut, "Unq muts sites": poi_sum}
+            {"unique_mutation": unq_mut, "unique_mutation_sites": poi_sum}
         )
 
     unique_mutation_df = pd.DataFrame(unique_mutation_rows)

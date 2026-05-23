@@ -14,7 +14,7 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 
 - Paths may be absolute or relative to the directory where you run the command.
 - Column-name settings are optional. Only change them if your input files use different column names.
-- Some existing output column names are preserved for compatibility unless explicitly changed in the config.
+- Default generated tables use normalized snake_case column names. Use config column-name settings when your input files use a different schema, including the original publication data layout.
 - Boolean values use TOML syntax: `true` or `false`.
 
 ## `smfs.match_sfs_to_mutation_rates`

@@ -20,8 +20,8 @@ UNIQUE_MUTATION_SITES_FILE = "expected_unique_mutation_sites_poisson_300.csv"
 OUTPUT_DIR = UNIQUE_MUTATION_SITES_DIR
 
 # Column names
-AC_COL = "AC"
-UNIQUE_MUTATION_SITES_COL = "Unq muts sites"
+AC_COL = "allele_count"
+UNIQUE_MUTATION_SITES_COL = "unique_mutation_sites"
 
 # Model settings
 AC_LIMIT = 300
@@ -67,7 +67,7 @@ def main(data_df, df_pmf):
         f.append(val)
 
     return pd.DataFrame(
-        [{"Count": i + 1, "pred prob": value} for i, value in enumerate(f)]
+        [{"allele_count": i + 1, "predicted_probability": value} for i, value in enumerate(f)]
     )
 
 

@@ -23,16 +23,16 @@ OUTPUT_FILE = "simulated_mutations.csv"
 MUTATION_RATE_OUTPUT_FILE = "simulated_site_mutation_rates.csv"
 
 # Column names
-SITE_COL = "Site"
-MUTATION_NUMBER_COL = "Mutation number"
-MUTATION_RATE_COL = "Mutation rate"
-MEAN_THETA_COL = "Mean theta"
-SD_THETA_COL = "SD theta"
-METHYLATION_LEVEL_COL = "Meth level"
-INPUT_METHYLATION_LEVEL_COL = "Meth_level"
-SAMPLED_MU_COL = "Sampled mu"
-ALLELE_COPIES_COL = "Allele copies"
-MUTATION_ID_COL = "Mutation id"
+SITE_COL = "site"
+MUTATION_NUMBER_COL = "mutation_number"
+MUTATION_RATE_COL = "mutation_rate"
+MEAN_THETA_COL = "mean_theta"
+SD_THETA_COL = "sd_theta"
+METHYLATION_LEVEL_COL = "methylation_level"
+INPUT_METHYLATION_LEVEL_COL = "methylation_level"
+SAMPLED_MU_COL = "sampled_mu"
+ALLELE_COPIES_COL = "allele_copies"
+MUTATION_ID_COL = "mutation_id"
 
 # Population model settings
 INITIAL_POPULATION = 10**4

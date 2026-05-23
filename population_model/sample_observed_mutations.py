@@ -19,8 +19,8 @@ OUTPUT_DIR = os.path.join(INPUT_DIR, "sampled_data")
 OUTPUT_FILE = "sampled_observed_mutations.csv.gz"
 
 # Column names
-ALLELE_COPIES_COL = "Allele copies"
-SAMPLED_MUTATION_COL = "Sampled mutation"
+ALLELE_COPIES_COL = "allele_copies"
+SAMPLED_MUTATION_COL = "sampled_mutation"
 
 # Sampling settings
 FINAL_POPULATION = 2 * (10**8)

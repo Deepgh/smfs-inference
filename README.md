@@ -109,7 +109,7 @@ See `docs/config_variables.md` for the available TOML config variables.
 
 The original input datasets are not distributed with this repository. To reproduce an analysis, provide equivalent input tables with the columns described in `docs/input_files.md` and configure paths with a TOML file such as `configs/template.toml` or `configs/paper_config.toml`.
 
-Several population-model scripts use random sampling. Re-running those scripts may produce different simulated outputs unless random seeds and input files are controlled. Some output column names preserve the original analysis naming for compatibility with existing downstream files.
+Several population-model scripts use random sampling. Re-running those scripts may produce different simulated outputs unless random seeds and input files are controlled. Default generated tables use normalized snake_case column names; use `configs/paper_config.toml` when working with the original publication data layout.
 
 ## Requirements
 

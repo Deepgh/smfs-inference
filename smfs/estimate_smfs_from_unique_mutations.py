@@ -20,9 +20,9 @@ UNIQUE_MUTATION_SITES_FILE = "expected_unique_mutation_sites_negative_binomial_3
 OUTPUT_DIR = "results"
 
 # Column names
-AC_COL = "AC_"
-SITES_COL = "Sites"
-UNIQUE_MUTATION_SITES_COL = "Unq muts sites"
+AC_COL = "allele_count"
+SITES_COL = "sites"
+UNIQUE_MUTATION_SITES_COL = "unique_mutation_sites"
 
 # Model settings
 AC_LIMIT = 300
@@ -82,7 +82,7 @@ def main(data_df, df_pmf, err_df=None):
         f.append(val)
 
     return pd.DataFrame(
-        [{"Count": i + 1, "pred prob": value} for i, value in enumerate(f)]
+        [{"allele_count": i + 1, "predicted_probability": value} for i, value in enumerate(f)]
     )
 
 

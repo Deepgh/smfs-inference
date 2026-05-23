@@ -34,7 +34,7 @@ Required `sfs_file` columns:
 | Reference sequence context | `ref_context_col` | `ref_context` |
 | Alternate sequence context | `alt_context_col` | `alt_context` |
 | Methylation level | `methylation_level_col` | `methylation_level` |
-| Number of sites for the SFS row | `sites_col` | `Sites` |
+| Number of sites for the SFS row | `sites_col` | `sites` |
 
 Required `mutation_rate_file` columns:
 
@@ -70,16 +70,16 @@ Required columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Site identifier | `site_col` | `Site` |
-| Site-specific sampled mutation rate | `mu_col` | `Sampled mu` |
-| Allele count | `ac_col` | `AC` |
+| Site identifier | `site_col` | `site` |
+| Site-specific sampled mutation rate | `mu_col` | `sampled_mu` |
+| Allele count | `ac_col` | `allele_count` |
 
 Outputs:
 
 | Config variable | Description |
 | --- | --- |
-| `output_xi_file` | CSV with the estimated xi value. The output column is currently named `Lambda` for compatibility. |
-| `output_unique_mutation_file` | CSV with expected site counts by unique-mutation count. Columns are currently `Unique mutation` and `Unq muts sites`. |
+| `output_xi_file` | CSV with the estimated xi value. The output column is `xi`. |
+| `output_unique_mutation_file` | CSV with expected site counts by unique-mutation count. Columns are `unique_mutation` and `unique_mutation_sites`. |
 
 ### `smfs/estimate_xi_negative_binomial.py`
 
@@ -95,17 +95,17 @@ Required columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Number of sites represented by the row | `sites_col` | `Sites` |
-| Mean theta | `mean_col` | `Mean theta` |
-| Standard deviation of theta | `sd_col` | `SD theta` |
-| Allele count | `ac_col` | `AC_nfe_down` |
+| Number of sites represented by the row | `sites_col` | `sites` |
+| Mean theta | `mean_col` | `mean_theta` |
+| Standard deviation of theta | `sd_col` | `sd_theta` |
+| Allele count | `ac_col` | `allele_count` |
 
 Outputs:
 
 | Config variable | Description |
 | --- | --- |
-| `output_xi_file` | CSV with the estimated xi value. Written only when `save_xi_output = true`. The output column is currently named `Lambda` for compatibility. |
-| `output_unique_mutation_file` | CSV with expected site counts by unique-mutation count. Columns are currently `Unique mutation` and `Unq muts sites`. |
+| `output_xi_file` | CSV with the estimated xi value. Written only when `save_xi_output = true`. The output column is `xi`. |
+| `output_unique_mutation_file` | CSV with expected site counts by unique-mutation count. Columns are `unique_mutation` and `unique_mutation_sites`. |
 
 ### `smfs/estimate_smfs_from_unique_mutations.py`
 
@@ -122,14 +122,14 @@ Required `input_file` columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Allele count | `ac_col` | `AC_` |
-| Number of sites at that allele count | `sites_col` | `Sites` |
+| Allele count | `ac_col` | `allele_count` |
+| Number of sites at that allele count | `sites_col` | `sites` |
 
 Required `unique_mutation_sites_file` columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Expected number of sites with a given number of unique mutations | `unique_mutation_sites_col` | `Unq muts sites` |
+| Expected number of sites with a given number of unique mutations | `unique_mutation_sites_col` | `unique_mutation_sites` |
 
 Optional error-correction input:
 
@@ -148,7 +148,7 @@ Output:
 
 | Config variable | Description |
 | --- | --- |
-| `output_file` | Predicted SMFS probabilities. Columns are currently `Count` and `pred prob`. |
+| `output_file` | Predicted SMFS probabilities. Columns are `allele_count` and `predicted_probability`. |
 
 ## Population Model Scripts
 
@@ -197,12 +197,12 @@ Required columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Mutation type/row identifier | `mutation_number_col` | `Mutation number` |
-| Mutation rate metadata | `mutation_rate_col` | `Mutation rate` |
-| Mean theta | `mean_theta_col` | `Mean theta` |
-| Standard deviation of theta | `sd_theta_col` | `SD theta` |
-| Methylation level | `input_methylation_level_col` | `Meth_level` |
-| Site-specific sampled mutation rate | `sampled_mu_col` | `Sampled mu` |
+| Mutation type/row identifier | `mutation_number_col` | `mutation_number` |
+| Mutation rate metadata | `mutation_rate_col` | `mutation_rate` |
+| Mean theta | `mean_theta_col` | `mean_theta` |
+| Standard deviation of theta | `sd_theta_col` | `sd_theta` |
+| Methylation level | `input_methylation_level_col` | `methylation_level` |
+| Site-specific sampled mutation rate | `sampled_mu_col` | `sampled_mu` |
 
 Outputs:
 
@@ -227,7 +227,7 @@ Required columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Number of allele copies in the simulated population | `allele_copies_col` | `Allele copies` |
+| Number of allele copies in the simulated population | `allele_copies_col` | `allele_copies` |
 
 Output:
 
@@ -251,15 +251,15 @@ Required columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Site identifier | `site_col` | `Site` |
-| Mutation identifier | `mutation_id_col` | `Mutation id` |
-| Methylation level | `methylation_level_col` | `Meth level` |
-| Mutation rate metadata | `mutation_rate_col` | `Mutation rate` |
-| Mutation type/row identifier | `mutation_number_col` | `Mutation number` |
-| Mean theta | `mean_theta_col` | `Mean theta` |
-| Standard deviation of theta | `sd_theta_col` | `SD theta` |
-| Site-specific sampled mutation rate | `sampled_mu_col` | `Sampled mu` |
-| Sampled mutation count | `sampled_mutation_col` | `Sampled mutation` |
+| Site identifier | `site_col` | `site` |
+| Mutation identifier | `mutation_id_col` | `mutation_id` |
+| Methylation level | `methylation_level_col` | `methylation_level` |
+| Mutation rate metadata | `mutation_rate_col` | `mutation_rate` |
+| Mutation type/row identifier | `mutation_number_col` | `mutation_number` |
+| Mean theta | `mean_theta_col` | `mean_theta` |
+| Standard deviation of theta | `sd_theta_col` | `sd_theta` |
+| Site-specific sampled mutation rate | `sampled_mu_col` | `sampled_mu` |
+| Sampled mutation count | `sampled_mutation_col` | `sampled_mutation` |
 
 Output:
 
@@ -267,7 +267,7 @@ Output:
 | --- | --- |
 | `output_dir` / `output_file` | Per-site derived-allele summary. |
 
-The output currently includes compatibility column names such as `Mew theta`, `Meth level`, `Sampled mutation sum`, and `Unique mutations`.
+The output uses normalized column names such as `mean_theta`, `methylation_level`, `sampled_mutation_sum`, and `unique_mutations`.
 
 ### `population_model/fill_missing_simulation_sites.py`
 
@@ -284,15 +284,15 @@ Required `derived_allele_file` columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Site identifier | `site_col` | `Site` |
-| Total sampled mutation count for the site | `sampled_mutation_sum_col` | `Sampled mutation sum` |
-| Number of unique mutations observed at the site | `unique_mutations_col` | `Unique mutations` |
+| Site identifier | `site_col` | `site` |
+| Total sampled mutation count for the site | `sampled_mutation_sum_col` | `sampled_mutation_sum` |
+| Number of unique mutations observed at the site | `unique_mutations_col` | `unique_mutations` |
 
 Required `mutation_rate_file` columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Site identifier | `site_col` | `Site` |
+| Site identifier | `site_col` | `site` |
 
 Output:
 
@@ -300,7 +300,7 @@ Output:
 | --- | --- |
 | `output_dir` / `output_file` | Merged simulation table with missing sampled values filled with zero. |
 
-The sampled mutation sum column is renamed to the value of `ac_col`, which defaults to `AC`.
+The sampled mutation sum column is renamed to the value of `ac_col`, which defaults to `allele_count`.
 
 ### `population_model/estimate_simulated_smfs_from_unique_mutations.py`
 
@@ -317,16 +317,16 @@ Required `input_file` columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Allele count | `ac_col` | `AC` |
+| Allele count | `ac_col` | `allele_count` |
 
 Required `unique_mutation_sites_file` columns:
 
 | Meaning | Config variable | Default column name |
 | --- | --- | --- |
-| Expected number of sites with a given number of unique mutations | `unique_mutation_sites_col` | `Unq muts sites` |
+| Expected number of sites with a given number of unique mutations | `unique_mutation_sites_col` | `unique_mutation_sites` |
 
 Output:
 
 | Config variable | Description |
 | --- | --- |
-| `output_dir` / `output_file` | Predicted simulated SMFS probabilities. Columns are currently `Count` and `pred prob`. |
+| `output_dir` / `output_file` | Predicted simulated SMFS probabilities. Columns are `allele_count` and `predicted_probability`. |

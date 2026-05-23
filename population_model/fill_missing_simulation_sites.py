@@ -20,10 +20,10 @@ OUTPUT_DIR = MUTATION_RATE_DIR
 OUTPUT_FILE = "simulation_sites_with_observed_counts.csv.gz"
 
 # Column names
-SITE_COL = "Site"
-SAMPLED_MUTATION_SUM_COL = "Sampled mutation sum"
-UNIQUE_MUTATIONS_COL = "Unique mutations"
-AC_COL = "AC"
+SITE_COL = "site"
+SAMPLED_MUTATION_SUM_COL = "sampled_mutation_sum"
+UNIQUE_MUTATIONS_COL = "unique_mutations"
+AC_COL = "allele_count"
 
 
 def main(derived_allele_df, mutation_rate_df):

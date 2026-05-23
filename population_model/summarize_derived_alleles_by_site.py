@@ -20,15 +20,15 @@ OUTPUT_DIR = INPUT_DIR
 OUTPUT_FILE = "observed_mutations_by_site.csv.gz"
 
 # Column names
-SITE_COL = "Site"
-MUTATION_ID_COL = "Mutation id"
-METHYLATION_LEVEL_COL = "Meth level"
-MUTATION_RATE_COL = "Mutation rate"
-MUTATION_NUMBER_COL = "Mutation number"
-MEAN_THETA_COL = "Mean theta"
-SD_THETA_COL = "SD theta"
-SAMPLED_MU_COL = "Sampled mu"
-SAMPLED_MUTATION_COL = "Sampled mutation"
+SITE_COL = "site"
+MUTATION_ID_COL = "mutation_id"
+METHYLATION_LEVEL_COL = "methylation_level"
+MUTATION_RATE_COL = "mutation_rate"
+MUTATION_NUMBER_COL = "mutation_number"
+MEAN_THETA_COL = "mean_theta"
+SD_THETA_COL = "sd_theta"
+SAMPLED_MU_COL = "sampled_mu"
+SAMPLED_MUTATION_COL = "sampled_mutation"
 
 warnings.filterwarnings("ignore")
 
@@ -45,15 +45,15 @@ def single_iteration(group):
     mut_sum = group[SAMPLED_MUTATION_COL].sum()
 
     return {
-        "Mutation number": mut_num,
-        "Site": site,
-        "Mutation rate": mut_rate,
-        "Mew theta": mean_theta,
-        "SD theta": sd_gamma,
-        "Sampled mu": sampled_mu,
-        "Meth level": methylation_level,
-        "Sampled mutation sum": mut_sum,
-        "Unique mutations": unq_mut,
+        "mutation_number": mut_num,
+        "site": site,
+        "mutation_rate": mut_rate,
+        "mean_theta": mean_theta,
+        "sd_theta": sd_gamma,
+        "sampled_mu": sampled_mu,
+        "methylation_level": methylation_level,
+        "sampled_mutation_sum": mut_sum,
+        "unique_mutations": unq_mut,
     }
 
 
