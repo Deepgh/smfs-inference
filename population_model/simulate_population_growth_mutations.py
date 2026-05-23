@@ -16,11 +16,11 @@ from workflow_config import apply_config
 CONFIG_SECTION = "population_model.simulate_population_growth_mutations"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-INPUT_FILE = "scaled_mu_diff_site.csv"
-OUTPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-OUTPUT_FILE = "der_allel_gamma_smp_mu_diff_site.csv"
-MUTATION_RATE_OUTPUT_FILE = "mut_rates_gamma_smp_diff_site.csv"
+INPUT_DIR = "results"
+INPUT_FILE = "sampled_site_mutation_rates.csv"
+OUTPUT_DIR = "results"
+OUTPUT_FILE = "simulated_mutations.csv"
+MUTATION_RATE_OUTPUT_FILE = "simulated_site_mutation_rates.csv"
 
 # Column names
 SITE_COL = "Site"

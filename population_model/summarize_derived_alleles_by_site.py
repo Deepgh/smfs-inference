@@ -14,10 +14,10 @@ from workflow_config import apply_config
 CONFIG_SECTION = "population_model.summarize_derived_alleles_by_site"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/sampled_data/"
-INPUT_FILE = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+INPUT_DIR = "results/sampled_data"
+INPUT_FILE = "sampled_observed_mutations.csv.gz"
 OUTPUT_DIR = INPUT_DIR
-OUTPUT_FILE = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
+OUTPUT_FILE = "observed_mutations_by_site.csv.gz"
 
 # Column names
 SITE_COL = "Site"

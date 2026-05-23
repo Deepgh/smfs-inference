@@ -13,10 +13,10 @@ from workflow_config import apply_config
 CONFIG_SECTION = "population_model.estimate_simulated_smfs_from_unique_mutations"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
-INPUT_FILE = "edited_sim_data_smp_mu_diff_site.csv.gz"
+INPUT_DIR = "results"
+INPUT_FILE = "simulation_sites_with_observed_counts.csv.gz"
 UNIQUE_MUTATION_SITES_DIR = INPUT_DIR
-UNIQUE_MUTATION_SITES_FILE = "unq_mut_sites_300_sim_mew_sd.csv"
+UNIQUE_MUTATION_SITES_FILE = "expected_unique_mutation_sites_poisson_300.csv"
 OUTPUT_DIR = UNIQUE_MUTATION_SITES_DIR
 
 # Column names
@@ -25,7 +25,7 @@ UNIQUE_MUTATION_SITES_COL = "Unq muts sites"
 
 # Model settings
 AC_LIMIT = 300
-OUTPUT_FILE = f"smfs_num_{AC_LIMIT}_sim_mew_sd.csv"
+OUTPUT_FILE = f"smfs_simulated_{AC_LIMIT}.csv"
 
 
 def main(data_df, df_pmf):

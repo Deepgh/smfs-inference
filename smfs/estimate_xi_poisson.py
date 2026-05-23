@@ -17,10 +17,10 @@ from workflow_config import apply_config
 CONFIG_SECTION = "smfs.estimate_xi_poisson"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
-INPUT_FILE = "edited_sim_data_smp_mu_diff_site.csv.gz"
+INPUT_DIR = "results"
+INPUT_FILE = "simulation_sites_with_observed_counts.csv.gz"
 OUTPUT_DIR = INPUT_DIR
-OUTPUT_XI_FILE = "lam_smp_mu.csv"
+OUTPUT_XI_FILE = "xi_poisson.csv"
 
 # Column names
 SITE_COL = "Site"
@@ -30,7 +30,7 @@ AC_COL = "AC"
 # Model settings
 INITIAL_XI = 1e3
 UNIQUE_MUTATION_LIMIT = 300
-OUTPUT_UNIQUE_MUTATION_FILE = f"unq_mut_sites_{UNIQUE_MUTATION_LIMIT}_sim_smp_mu.csv"
+OUTPUT_UNIQUE_MUTATION_FILE = f"expected_unique_mutation_sites_poisson_{UNIQUE_MUTATION_LIMIT}.csv"
 OPTIMIZER_METHOD = "nelder-mead"
 OPTIMIZER_OPTIONS = {"xatol": 1e-8, "disp": True}
 EPS = 1e-12

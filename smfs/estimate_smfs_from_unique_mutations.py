@@ -13,11 +13,11 @@ from workflow_config import apply_config
 CONFIG_SECTION = "smfs.estimate_smfs_from_unique_mutations"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
-INPUT_FILE = "edited_sim_data_smp_mu_diff_site.csv.gz"
-UNIQUE_MUTATION_SITES_DIR = INPUT_DIR
-UNIQUE_MUTATION_SITES_FILE = "unq_mut_sites_300_josh_mu.csv"
-OUTPUT_DIR = UNIQUE_MUTATION_SITES_DIR
+INPUT_DIR = "data"
+INPUT_FILE = "observed_allele_counts.csv.gz"
+UNIQUE_MUTATION_SITES_DIR = "results"
+UNIQUE_MUTATION_SITES_FILE = "expected_unique_mutation_sites_negative_binomial_300.csv"
+OUTPUT_DIR = "results"
 
 # Column names
 AC_COL = "AC_"
@@ -26,11 +26,11 @@ UNIQUE_MUTATION_SITES_COL = "Unq muts sites"
 
 # Model settings
 AC_LIMIT = 300
-OUTPUT_FILE = f"smfs_num_{AC_LIMIT}_sim_smp_mu.csv"
+OUTPUT_FILE = f"smfs_observed_{AC_LIMIT}.csv"
 
 # Optional error correction settings
 APPLY_ERROR_CORRECTION = False
-ERROR_FILE = "ajhg_00004094_supp_table2_mut.tsv"
+ERROR_FILE = "data/mutation_rates.tsv"
 ERROR_NUM_SITES_COL = "num_sites"
 ERROR_RATE_COL = "error"
 ERROR_SCALE = 10**6
@@ -101,7 +101,7 @@ if __name__ == "__main__":
 
     error_df = None
     if APPLY_ERROR_CORRECTION:
-        error_df = pd.read_csv(os.path.join(UNIQUE_MUTATION_SITES_DIR, ERROR_FILE), sep="\t")
+        error_df = pd.read_csv(ERROR_FILE, sep="\t")
 
     output_df = main(input_df, pmf_df, error_df)
     output_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)

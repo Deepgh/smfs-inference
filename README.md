@@ -57,9 +57,9 @@ Each script reads only its own section of the config file. For example, `smfs/es
 ```toml
 [smfs.estimate_xi_poisson]
 input_dir = "results"
-input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
+input_file = "simulation_sites_with_observed_counts.csv.gz"
 output_dir = "results"
-output_xi_file = "lam_smp_mu.csv"
+output_xi_file = "xi_poisson.csv"
 initial_xi = 1000.0
 unique_mutation_limit = 300
 ```
@@ -109,7 +109,7 @@ See `docs/config_variables.md` for the available TOML config variables.
 
 The original input datasets are not distributed with this repository. To reproduce an analysis, provide equivalent input tables with the columns described in `docs/input_files.md` and configure paths with a TOML file such as `configs/template.toml` or `configs/paper_config.toml`.
 
-Several population-model scripts use random sampling. Re-running those scripts may produce different simulated outputs unless random seeds and input files are controlled. Generated filenames and some output column names preserve the original analysis naming for compatibility with existing downstream files.
+Several population-model scripts use random sampling. Re-running those scripts may produce different simulated outputs unless random seeds and input files are controlled. Some output column names preserve the original analysis naming for compatibility with existing downstream files.
 
 ## Requirements
 

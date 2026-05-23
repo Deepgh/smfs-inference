@@ -13,18 +13,9 @@ from workflow_config import apply_config
 CONFIG_SECTION = "population_model.sample_site_mutation_rates"
 
 # Paths and files
-INPUT_FILE = (
-    "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-    "ajhg_00004094_supp_table2_mut.tsv"
-)
-EXPANDED_OUTPUT_FILE = (
-    "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-    "scaled_mu_diff_site.csv"
-)
-DIAGNOSTIC_OUTPUT_FILE = (
-    "/project/yuvalsim/Deep/project2/human_data/sim_hum_data/"
-    "final_approach/scaled_mu_from_musd.csv"
-)
+INPUT_FILE = "data/mutation_rates.tsv"
+EXPANDED_OUTPUT_FILE = "results/sampled_site_mutation_rates.csv"
+DIAGNOSTIC_OUTPUT_FILE = "results/mutation_rate_sampling_diagnostics.csv"
 
 # Column names
 MEAN_THETA_COL = "mean_theta"
@@ -159,10 +150,12 @@ if __name__ == "__main__":
     input_df = pd.read_csv(INPUT_FILE, sep="\t")
     expanded_output_df, diagnostic_output_df = main(input_df)
 
+    Path(EXPANDED_OUTPUT_FILE).parent.mkdir(parents=True, exist_ok=True)
     expanded_output_df.to_csv(EXPANDED_OUTPUT_FILE, index=False)
 
     if SHOW_DIAGNOSTIC_PLOTS:
         plot_diagnostics(diagnostic_output_df.copy())
 
     if WRITE_DIAGNOSTIC_OUTPUT:
+        Path(DIAGNOSTIC_OUTPUT_FILE).parent.mkdir(parents=True, exist_ok=True)
         diagnostic_output_df.to_csv(DIAGNOSTIC_OUTPUT_FILE, index=False)

@@ -12,15 +12,12 @@ from workflow_config import apply_config
 CONFIG_SECTION = "population_model.fill_missing_simulation_sites"
 
 # Paths and files
-DERIVED_ALLELE_DIR = (
-    "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-    "simulation_results/sampled_data/"
-)
-DERIVED_ALLELE_FILE = "der_allele_sum_per_site_smp_mu_diff_site.csv.gz"
-MUTATION_RATE_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
-MUTATION_RATE_FILE = "mut_rates_gamma_smp_diff_site.csv"
+DERIVED_ALLELE_DIR = "results/sampled_data"
+DERIVED_ALLELE_FILE = "observed_mutations_by_site.csv.gz"
+MUTATION_RATE_DIR = "results"
+MUTATION_RATE_FILE = "simulated_site_mutation_rates.csv"
 OUTPUT_DIR = MUTATION_RATE_DIR
-OUTPUT_FILE = "edited_sim_data_smp_mu_diff_site.csv.gz"
+OUTPUT_FILE = "simulation_sites_with_observed_counts.csv.gz"
 
 # Column names
 SITE_COL = "Site"

@@ -13,10 +13,10 @@ from workflow_config import apply_config
 CONFIG_SECTION = "population_model.sample_observed_mutations"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-INPUT_FILE = "der_allel_gamma_smp_mu_diff_site.csv"
+INPUT_DIR = "results"
+INPUT_FILE = "simulated_mutations.csv"
 OUTPUT_DIR = os.path.join(INPUT_DIR, "sampled_data")
-OUTPUT_FILE = "samp_data_10_5_5_smp_mu_diff_site.csv.gz"
+OUTPUT_FILE = "sampled_observed_mutations.csv.gz"
 
 # Column names
 ALLELE_COPIES_COL = "Allele copies"

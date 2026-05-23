@@ -11,12 +11,9 @@ from workflow_config import apply_config
 CONFIG_SECTION = "smfs.match_sfs_to_mutation_rates"
 
 # Paths and files
-SFS_FILE = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_syn_ac_1M.csv.gz"
-MUTATION_RATE_FILE = (
-    "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-    "ajhg_00004094_supp_table2_mut.tsv"
-)
-OUTPUT_FILE = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_per_site_missense_ac_1M.csv.gz"
+SFS_FILE = "data/site_frequency_spectrum.csv.gz"
+MUTATION_RATE_FILE = "data/mutation_rates.tsv"
+OUTPUT_FILE = "results/matched_site_frequency_spectrum.csv.gz"
 SAVE_OUTPUT = False
 
 # Column names
@@ -124,4 +121,5 @@ if __name__ == "__main__":
     print(f"Len of all: {counts['total_matches']}")
 
     if SAVE_OUTPUT:
+        Path(OUTPUT_FILE).parent.mkdir(parents=True, exist_ok=True)
         output_df.to_csv(OUTPUT_FILE, compression="gzip", index=False)

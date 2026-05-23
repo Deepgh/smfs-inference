@@ -16,10 +16,10 @@ from workflow_config import apply_config
 CONFIG_SECTION = "smfs.estimate_xi_negative_binomial"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
-INPUT_FILE = "sfs_genes_dist.csv.gz"
-OUTPUT_DIR = INPUT_DIR
-OUTPUT_XI_FILE = "lam_mu_sd_josh.csv"
+INPUT_DIR = "data"
+INPUT_FILE = "observed_site_frequency_spectrum.csv.gz"
+OUTPUT_DIR = "results"
+OUTPUT_XI_FILE = "xi_negative_binomial.csv"
 SAVE_XI_OUTPUT = False
 
 # Column names
@@ -31,7 +31,7 @@ AC_COL = "AC_nfe_down"
 # Model settings
 INITIAL_XI = 1e3
 UNIQUE_MUTATION_LIMIT = 300
-OUTPUT_UNIQUE_MUTATION_FILE = f"unq_mut_sites_{UNIQUE_MUTATION_LIMIT}_josh_mew_sd.csv"
+OUTPUT_UNIQUE_MUTATION_FILE = f"expected_unique_mutation_sites_negative_binomial_{UNIQUE_MUTATION_LIMIT}.csv"
 OPTIMIZER_METHOD = "nelder-mead"
 OPTIMIZER_OPTIONS = {"xatol": 1e-8, "disp": True}
 EPS = 1e-12

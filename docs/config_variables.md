@@ -14,7 +14,7 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 
 - Paths may be absolute or relative to the directory where you run the command.
 - Column-name settings are optional. Only change them if your input files use different column names.
-- Existing output column names and generated filenames are preserved for compatibility unless explicitly changed in the config.
+- Some existing output column names are preserved for compatibility unless explicitly changed in the config.
 - Boolean values use TOML syntax: `true` or `false`.
 
 ## `smfs.match_sfs_to_mutation_rates`
