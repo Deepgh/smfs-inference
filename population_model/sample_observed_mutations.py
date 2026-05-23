@@ -27,25 +27,26 @@ FINAL_POPULATION = 2 * (10**8)
 SAMPLE_SIZE = 2 * 5 * (10**5)
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))
+def main(df):
+    df = df.copy()
     df[SAMPLED_MUTATION_COL] = hypergeom.rvs(
         FINAL_POPULATION,
         df[ALLELE_COPIES_COL],
         SAMPLE_SIZE,
     )
 
-    df_sampled = df[df[SAMPLED_MUTATION_COL] != 0]
-    df_sampled.to_csv(
+    return df[df[SAMPLED_MUTATION_COL] != 0]
+
+
+if __name__ == "__main__":
+    apply_config(CONFIG_SECTION, globals())
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    input_df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))
+    sampled_df = main(input_df)
+    sampled_df.to_csv(
         os.path.join(OUTPUT_DIR, OUTPUT_FILE),
         compression="gzip",
         index=False,
     )
-
-
-if __name__ == "__main__":
-    main()

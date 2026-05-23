@@ -129,14 +129,8 @@ def move_column_first(df, column):
     return df[cols]
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    sampled_mu_df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))
+def main(sampled_mu_df, num_cores):
     run_items = list(sampled_mu_df.iterrows())
-    num_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
 
     with multiprocessing.Pool(num_cores) as pool:
         results = pool.map(single_iteration, run_items)
@@ -147,9 +141,18 @@ def main():
     df_results = move_column_first(df_results, MUTATION_NUMBER_COL)
     df_rates = move_column_first(df_rates, MUTATION_NUMBER_COL)
 
-    df_results.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)
-    df_rates.to_csv(os.path.join(OUTPUT_DIR, MUTATION_RATE_OUTPUT_FILE), index=False)
+    return df_results, df_rates
 
 
 if __name__ == "__main__":
-    main()
+    apply_config(CONFIG_SECTION, globals())
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    sampled_mu_input_df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE))
+    number_of_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
+
+    output_df, mutation_rate_df = main(sampled_mu_input_df, number_of_cores)
+
+    output_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)
+    mutation_rate_df.to_csv(os.path.join(OUTPUT_DIR, MUTATION_RATE_OUTPUT_FILE), index=False)

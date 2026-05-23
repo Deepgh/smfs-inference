@@ -57,24 +57,26 @@ def single_iteration(group):
     }
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE), compression="gzip")
-    number_of_cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
+def main(df, number_of_cores):
     grouped_df = df.groupby(SITE_COL)
 
     with multiprocessing.Pool(number_of_cores) as pool:
         results = pool.map(single_iteration, [group for _, group in grouped_df])
 
-    df_sum_sites = pd.DataFrame(results)
+    return pd.DataFrame(results)
+
+
+if __name__ == "__main__":
+    apply_config(CONFIG_SECTION, globals())
+
+    input_df = pd.read_csv(os.path.join(INPUT_DIR, INPUT_FILE), compression="gzip")
+    cores = int(os.environ.get("SLURM_CPUS_PER_TASK", multiprocessing.cpu_count()))
+
+    df_sum_sites = main(input_df, cores)
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     df_sum_sites.to_csv(
         os.path.join(OUTPUT_DIR, OUTPUT_FILE),
         compression="gzip",
         index=False,
     )
-
-
-if __name__ == "__main__":
-    main()

@@ -65,15 +65,8 @@ def neg_loglik(log_xi, mu_seg, mu_non, sig_seg, sig_non):
     return -ll
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-
-    data_df = pd.read_csv(
-        os.path.join(INPUT_DIR, INPUT_FILE),
-        compression="gzip",
-    )
+def main(data_df):
+    data_df = data_df.copy()
 
     # If rows contain site counts rather than one row per site, expand here.
     # data_df = (
@@ -92,22 +85,17 @@ def main():
         x0=np.log([INITIAL_XI]),
         args=(mu_seg, mu_non, sig_seg, sig_non),
         method=OPTIMIZER_METHOD,
-        options=OPTIMIZER_OPTIONS,
+        options={**OPTIMIZER_OPTIONS, "disp": False},
     )
 
     xi_hat = float(np.exp(res.x[0]))
-    print(f"Estimated xi: {xi_hat:}")
 
     xi_df = pd.DataFrame([{"Lambda": xi_hat}])
-    if SAVE_XI_OUTPUT:
-        xi_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_XI_FILE), index=False)
 
-    df1 = pd.DataFrame()
+    unique_mutation_rows = []
     stop_filling = False
 
     for unq_mut in range(UNIQUE_MUTATION_LIMIT + 1):
-        print(unq_mut)
-
         if not stop_filling:
             col_name = f"Unq muts sites_{unq_mut}"
 
@@ -118,20 +106,38 @@ def main():
             )
 
             poi_sum = data_df[col_name].sum()
-            print(poi_sum)
 
             if poi_sum == 0:
                 stop_filling = True
         else:
             poi_sum = 0
 
-        df1 = pd.concat(
-            [df1, pd.DataFrame([{"Unique mutation": unq_mut, "Unq muts sites": poi_sum}])],
-            ignore_index=True,
+        unique_mutation_rows.append(
+            {"Unique mutation": unq_mut, "Unq muts sites": poi_sum}
         )
 
-    df1.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_UNIQUE_MUTATION_FILE), index=False)
+    unique_mutation_df = pd.DataFrame(unique_mutation_rows)
+    return xi_hat, xi_df, unique_mutation_df
 
 
 if __name__ == "__main__":
-    main()
+    apply_config(CONFIG_SECTION, globals())
+
+    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+
+    input_df = pd.read_csv(
+        os.path.join(INPUT_DIR, INPUT_FILE),
+        compression="gzip",
+    )
+
+    estimated_xi, xi_output_df, unique_mutation_output_df = main(input_df)
+
+    print(f"Estimated xi: {estimated_xi:}")
+
+    if SAVE_XI_OUTPUT:
+        xi_output_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_XI_FILE), index=False)
+
+    unique_mutation_output_df.to_csv(
+        os.path.join(OUTPUT_DIR, OUTPUT_UNIQUE_MUTATION_FILE),
+        index=False,
+    )

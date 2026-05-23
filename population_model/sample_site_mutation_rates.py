@@ -84,12 +84,11 @@ def add_gamma_parameters(df):
     return df
 
 
-def write_expanded_site_rates(df):
+def build_expanded_site_rates(df):
     expanded_rows = []
     mut_num = 1
 
     for _, row in df.iterrows():
-        print(mut_num)
         rng = np.random.default_rng(int(row[SEED_COL]))
         n = int(row[NUM_SITES_COL])
         samples = rng.gamma(shape=row[GAMMA_SHAPE_COL], scale=row[GAMMA_SCALE_COL], size=n)
@@ -107,8 +106,7 @@ def write_expanded_site_rates(df):
         mut_num += 1
         expanded_rows.append(long_df)
 
-    result_df = pd.concat(expanded_rows, ignore_index=True)
-    result_df.to_csv(EXPANDED_OUTPUT_FILE, index=False)
+    return pd.concat(expanded_rows, ignore_index=True)
 
 
 def plot_diagnostics(df):
@@ -133,14 +131,12 @@ def plot_diagnostics(df):
     plt.show()
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    df = pd.read_csv(INPUT_FILE, sep="\t")
+def main(df):
+    df = df.copy()
     df = df.drop(DROP_COLUMNS, axis=1)
     df = add_gamma_parameters(df)
 
-    write_expanded_site_rates(df)
+    expanded_df = build_expanded_site_rates(df)
 
     df[[SAMPLED_MU_COL, SAMPLED_SD_COL]] = df.apply(
         lambda row: sample_mean(
@@ -152,15 +148,21 @@ def main():
         axis=1,
     )
 
-    if SHOW_DIAGNOSTIC_PLOTS:
-        plot_diagnostics(df)
-
     cleanup_cols = [GAMMA_SHAPE_COL, GAMMA_SCALE_COL, SEED_COL, DIFF_COL, DIFF_SD_COL]
-    df = df.drop(columns=[col for col in cleanup_cols if col in df.columns])
-
-    if WRITE_DIAGNOSTIC_OUTPUT:
-        df.to_csv(DIAGNOSTIC_OUTPUT_FILE, index=False)
+    diagnostic_df = df.drop(columns=[col for col in cleanup_cols if col in df.columns])
+    return expanded_df, diagnostic_df
 
 
 if __name__ == "__main__":
-    main()
+    apply_config(CONFIG_SECTION, globals())
+
+    input_df = pd.read_csv(INPUT_FILE, sep="\t")
+    expanded_output_df, diagnostic_output_df = main(input_df)
+
+    expanded_output_df.to_csv(EXPANDED_OUTPUT_FILE, index=False)
+
+    if SHOW_DIAGNOSTIC_PLOTS:
+        plot_diagnostics(diagnostic_output_df.copy())
+
+    if WRITE_DIAGNOSTIC_OUTPUT:
+        diagnostic_output_df.to_csv(DIAGNOSTIC_OUTPUT_FILE, index=False)

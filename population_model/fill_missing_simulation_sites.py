@@ -29,17 +29,7 @@ UNIQUE_MUTATIONS_COL = "Unique mutations"
 AC_COL = "AC"
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-
-    derived_allele_df = pd.read_csv(
-        os.path.join(DERIVED_ALLELE_DIR, DERIVED_ALLELE_FILE),
-        compression="gzip",
-    )
-    mutation_rate_df = pd.read_csv(os.path.join(MUTATION_RATE_DIR, MUTATION_RATE_FILE))
-
+def main(derived_allele_df, mutation_rate_df):
     merge_cols = [SITE_COL, SAMPLED_MUTATION_SUM_COL, UNIQUE_MUTATIONS_COL]
     merged_df = mutation_rate_df.merge(
         derived_allele_df[merge_cols],
@@ -53,12 +43,23 @@ def main():
     merged_df = merged_df.rename(columns={SAMPLED_MUTATION_SUM_COL: AC_COL})
     merged_df[SITE_COL] += 1
 
-    merged_df.to_csv(
+    return merged_df
+
+
+if __name__ == "__main__":
+    apply_config(CONFIG_SECTION, globals())
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    derived_allele_input_df = pd.read_csv(
+        os.path.join(DERIVED_ALLELE_DIR, DERIVED_ALLELE_FILE),
+        compression="gzip",
+    )
+    mutation_rate_input_df = pd.read_csv(os.path.join(MUTATION_RATE_DIR, MUTATION_RATE_FILE))
+
+    output_df = main(derived_allele_input_df, mutation_rate_input_df)
+    output_df.to_csv(
         os.path.join(OUTPUT_DIR, OUTPUT_FILE),
         compression="gzip",
         index=False,
     )
-
-
-if __name__ == "__main__":
-    main()

@@ -36,25 +36,15 @@ ERROR_RATE_COL = "error"
 ERROR_SCALE = 10**6
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    data_df = pd.read_csv(
-        os.path.join(INPUT_DIR, INPUT_FILE),
-        compression="gzip",
-    )
-
-    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-
-    pmf_csv = os.path.join(UNIQUE_MUTATION_SITES_DIR, UNIQUE_MUTATION_SITES_FILE)
-    df_pmf = pd.read_csv(pmf_csv)
-
+def main(data_df, df_pmf, err_df=None):
     eps_1 = df_pmf.iloc[1][UNIQUE_MUTATION_SITES_COL]
     num_cop_1 = sum(data_df[data_df[AC_COL] == 1][SITES_COL])
     prop_unq_muts_1 = num_cop_1 / eps_1
 
     if APPLY_ERROR_CORRECTION:
-        err_df = pd.read_csv(os.path.join(UNIQUE_MUTATION_SITES_DIR, ERROR_FILE), sep="\t")
+        if err_df is None:
+            raise ValueError("err_df is required when APPLY_ERROR_CORRECTION is true")
+
         wt_sc_error = sum(err_df[ERROR_NUM_SITES_COL] * err_df[ERROR_RATE_COL] * ERROR_SCALE)
         prop_unq_muts_1 = (num_cop_1 - wt_sc_error) / eps_1
 
@@ -72,7 +62,6 @@ def main():
     for acs in range(2, AC_LIMIT):
         conv_lists = []
         f_convolved = f
-        print(acs + 1)
 
         for _ in range(acs):
             f_convolved = np.convolve(f, f_convolved)
@@ -92,14 +81,27 @@ def main():
         val = (sum(data_df[data_df[AC_COL] == acs + 1][SITES_COL]) - s1) / eps_1
         f.append(val)
 
-    new_df = pd.DataFrame()
-
-    for i in range(len(f)):
-        data = pd.DataFrame([{"Count": i + 1, "pred prob": f[i]}])
-        new_df = pd.concat([new_df, data], ignore_index=True)
-
-    new_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)
+    return pd.DataFrame(
+        [{"Count": i + 1, "pred prob": value} for i, value in enumerate(f)]
+    )
 
 
 if __name__ == "__main__":
-    main()
+    apply_config(CONFIG_SECTION, globals())
+
+    input_df = pd.read_csv(
+        os.path.join(INPUT_DIR, INPUT_FILE),
+        compression="gzip",
+    )
+
+    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+
+    pmf_csv = os.path.join(UNIQUE_MUTATION_SITES_DIR, UNIQUE_MUTATION_SITES_FILE)
+    pmf_df = pd.read_csv(pmf_csv)
+
+    error_df = None
+    if APPLY_ERROR_CORRECTION:
+        error_df = pd.read_csv(os.path.join(UNIQUE_MUTATION_SITES_DIR, ERROR_FILE), sep="\t")
+
+    output_df = main(input_df, pmf_df, error_df)
+    output_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)

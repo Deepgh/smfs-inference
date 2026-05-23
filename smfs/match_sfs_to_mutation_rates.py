@@ -45,9 +45,7 @@ def swap_first_third(seq):
     return seq[2] + seq[1] + seq[0] if len(seq) == 3 else seq
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
+def main(sfs_df, mutation_rate_df):
     mutation_rate_columns = [
         REF_CONTEXT_COL,
         ALT_CONTEXT_COL,
@@ -66,7 +64,7 @@ def main():
         ERROR_COL: ERROR_OUT_COL,
     }
 
-    sfs_df = pd.read_csv(SFS_FILE, compression="gzip")
+    sfs_df = sfs_df.copy()
     sfs_df[METHYLATION_LEVEL_COL] = sfs_df[METHYLATION_LEVEL_COL].fillna(0).astype(int)
 
     sfs_grouped = (
@@ -77,11 +75,9 @@ def main():
         .rename(columns={SITES_COL: MUTATION_SUM_COL})
     )
 
-    mutation_rate_df = pd.read_csv(MUTATION_RATE_FILE, sep="\t")
-    mutation_rate_df = mutation_rate_df[mutation_rate_columns]
+    mutation_rate_df = mutation_rate_df[mutation_rate_columns].copy()
 
     matched = pd.merge(mutation_rate_df, sfs_grouped, on=triplet_key, how="inner")
-    print(f"Common list 1 match: {len(matched)}")
 
     sfs_set = set(tuple(x) for x in sfs_grouped[triplet_key].values)
     mutation_rate_set = set(tuple(x) for x in mutation_rate_df[triplet_key].values)
@@ -100,18 +96,32 @@ def main():
     mutation_rate_unmatched[ALT_CONTEXT_COL] = mutation_rate_unmatched[ALT_CONTEXT_COL].apply(swap_first_third)
 
     swap_match = pd.merge(mutation_rate_unmatched, sfs_grouped, on=triplet_key, how="inner")
-    print(f"Swap match: {len(swap_match)}")
 
     all_matches = pd.concat([matched, swap_match], ignore_index=True)
-    print(f"Len of all: {len(all_matches)}")
 
     matched_sfs = sfs_df.merge(all_matches, on=triplet_key, how="inner")
     matched_sfs = matched_sfs.rename(columns=rename_columns)
     matched_sfs = matched_sfs.drop(columns=[MUTATION_SUM_COL])
 
-    if SAVE_OUTPUT:
-        matched_sfs.to_csv(OUTPUT_FILE, compression="gzip", index=False)
+    match_counts = {
+        "direct_matches": len(matched),
+        "reverse_complement_matches": len(swap_match),
+        "total_matches": len(all_matches),
+    }
+    return matched_sfs, match_counts
 
 
 if __name__ == "__main__":
-    main()
+    apply_config(CONFIG_SECTION, globals())
+
+    sfs_data = pd.read_csv(SFS_FILE, compression="gzip")
+    mutation_rate_data = pd.read_csv(MUTATION_RATE_FILE, sep="\t")
+
+    output_df, counts = main(sfs_data, mutation_rate_data)
+
+    print(f"Common list 1 match: {counts['direct_matches']}")
+    print(f"Swap match: {counts['reverse_complement_matches']}")
+    print(f"Len of all: {counts['total_matches']}")
+
+    if SAVE_OUTPUT:
+        output_df.to_csv(OUTPUT_FILE, compression="gzip", index=False)
