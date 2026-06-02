@@ -13,48 +13,38 @@ from workflow_config import apply_config
 CONFIG_SECTION = "smfs.estimate_smfs_from_unique_mutations"
 
 # Paths and files
-INPUT_DIR = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
-INPUT_FILE = "edited_sim_data_smp_mu_diff_site.csv.gz"
-UNIQUE_MUTATION_SITES_DIR = INPUT_DIR
-UNIQUE_MUTATION_SITES_FILE = "unq_mut_sites_300_josh_mu.csv"
-OUTPUT_DIR = UNIQUE_MUTATION_SITES_DIR
+INPUT_DIR = "data"
+INPUT_FILE = "observed_allele_counts.csv.gz"
+UNIQUE_MUTATION_SITES_DIR = "results"
+UNIQUE_MUTATION_SITES_FILE = "expected_unique_mutation_sites_negative_binomial_300.csv"
+OUTPUT_DIR = "results"
 
 # Column names
-AC_COL = "AC_"
-SITES_COL = "Sites"
-UNIQUE_MUTATION_SITES_COL = "Unq muts sites"
+AC_COL = "allele_count"
+SITES_COL = "sites"
+UNIQUE_MUTATION_SITES_COL = "unique_mutation_sites"
 
 # Model settings
 AC_LIMIT = 300
-OUTPUT_FILE = f"smfs_num_{AC_LIMIT}_sim_smp_mu.csv"
+OUTPUT_FILE = f"smfs_observed_{AC_LIMIT}.csv"
 
 # Optional error correction settings
 APPLY_ERROR_CORRECTION = False
-ERROR_FILE = "ajhg_00004094_supp_table2_mut.tsv"
+ERROR_FILE = "reference_data/mut_rates.csv"
 ERROR_NUM_SITES_COL = "num_sites"
 ERROR_RATE_COL = "error"
 ERROR_SCALE = 10**6
 
 
-def main():
-    apply_config(CONFIG_SECTION, globals())
-
-    data_df = pd.read_csv(
-        os.path.join(INPUT_DIR, INPUT_FILE),
-        compression="gzip",
-    )
-
-    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-
-    pmf_csv = os.path.join(UNIQUE_MUTATION_SITES_DIR, UNIQUE_MUTATION_SITES_FILE)
-    df_pmf = pd.read_csv(pmf_csv)
-
+def main(data_df, df_pmf, err_df=None):
     eps_1 = df_pmf.iloc[1][UNIQUE_MUTATION_SITES_COL]
     num_cop_1 = sum(data_df[data_df[AC_COL] == 1][SITES_COL])
     prop_unq_muts_1 = num_cop_1 / eps_1
 
     if APPLY_ERROR_CORRECTION:
-        err_df = pd.read_csv(os.path.join(UNIQUE_MUTATION_SITES_DIR, ERROR_FILE), sep="\t")
+        if err_df is None:
+            raise ValueError("err_df is required when APPLY_ERROR_CORRECTION is true")
+
         wt_sc_error = sum(err_df[ERROR_NUM_SITES_COL] * err_df[ERROR_RATE_COL] * ERROR_SCALE)
         prop_unq_muts_1 = (num_cop_1 - wt_sc_error) / eps_1
 
@@ -72,7 +62,6 @@ def main():
     for acs in range(2, AC_LIMIT):
         conv_lists = []
         f_convolved = f
-        print(acs + 1)
 
         for _ in range(acs):
             f_convolved = np.convolve(f, f_convolved)
@@ -92,14 +81,27 @@ def main():
         val = (sum(data_df[data_df[AC_COL] == acs + 1][SITES_COL]) - s1) / eps_1
         f.append(val)
 
-    new_df = pd.DataFrame()
-
-    for i in range(len(f)):
-        data = pd.DataFrame([{"Count": i + 1, "pred prob": f[i]}])
-        new_df = pd.concat([new_df, data], ignore_index=True)
-
-    new_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)
+    return pd.DataFrame(
+        [{"allele_count": i + 1, "predicted_probability": value} for i, value in enumerate(f)]
+    )
 
 
 if __name__ == "__main__":
-    main()
+    apply_config(CONFIG_SECTION, globals())
+
+    input_df = pd.read_csv(
+        os.path.join(INPUT_DIR, INPUT_FILE),
+        compression="gzip",
+    )
+
+    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+
+    pmf_csv = os.path.join(UNIQUE_MUTATION_SITES_DIR, UNIQUE_MUTATION_SITES_FILE)
+    pmf_df = pd.read_csv(pmf_csv)
+
+    error_df = None
+    if APPLY_ERROR_CORRECTION:
+        error_df = pd.read_csv(ERROR_FILE, sep=None, engine="python")
+
+    output_df = main(input_df, pmf_df, error_df)
+    output_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)

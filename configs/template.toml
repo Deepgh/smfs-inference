@@ -4,9 +4,9 @@
 #   python smfs/estimate_xi_poisson.py --config configs/my_analysis.toml
 
 [smfs.match_sfs_to_mutation_rates]
-sfs_file = "data/sfs_syn_ac_1M.csv.gz"
-mutation_rate_file = "data/ajhg_00004094_supp_table2_mut.tsv"
-output_file = "results/sfs_per_site_missense_ac_1M.csv.gz"
+sfs_file = "data/site_frequency_spectrum.csv.gz"
+mutation_rate_file = "reference_data/mut_rates.csv"
+output_file = "results/matched_site_frequency_spectrum.csv.gz"
 save_output = true
 
 [smfs.estimate_xi_poisson]
@@ -28,7 +28,7 @@ initial_xi = 1000.0
 unique_mutation_limit = 300
 output_unique_mutation_file = "unq_mut_sites_300_josh_mew_sd.csv"
 
-[smfs.estimate_smfs_from_unique_mutations]
+[smfs.estimate_smfs]
 input_dir = "results"
 input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
 unique_mutation_sites_dir = "results"
@@ -37,12 +37,24 @@ output_dir = "results"
 ac_limit = 300
 output_file = "smfs_num_300_sim_smp_mu.csv"
 apply_error_correction = false
-error_file = "data/ajhg_00004094_supp_table2_mut.tsv"
+error_file = "reference_data/mut_rates.csv"
+
+[smfs.reconstruct_sfs_from_smfs]
+input_dir = "data"
+input_file = "observed_site_frequency_spectrum.csv.gz"
+predicted_probability_dir = "results"
+predicted_probability_file = "smfs_observed_300.csv"
+xi_dir = "results"
+xi_file = "xi_negative_binomial.csv"
+output_dir = "results"
+output_file = "reconstructed_sfs_by_context.csv"
+ac_limit = 200
+rows_per_context = 1000001
 
 [population_model.sample_site_mutation_rates]
-input_file = "data/ajhg_00004094_supp_table2_mut.tsv"
-expanded_output_file = "results/scaled_mu_diff_site.csv"
-diagnostic_output_file = "results/scaled_mu_from_musd.csv"
+input_file = "reference_data/mut_rates.csv"
+expanded_output_file = "results/sampled_site_mutation_rates.csv"
+diagnostic_output_file = "results/mutation_rate_sampling_diagnostics.csv"
 diagnostic_sample_size = 100000
 show_diagnostic_plots = false
 write_diagnostic_output = true
