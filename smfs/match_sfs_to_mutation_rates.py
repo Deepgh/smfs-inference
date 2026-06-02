@@ -26,7 +26,7 @@ METHYLATION_LEVEL_COL = "methylation_level"
 SITES_COL = "Sites"
 MUTATION_SUM_COL = "mut_sum"
 
-MU_GNOMAD_COL = "mu_gnomad"
+MU_COL = "mu"
 MEAN_THETA_COL = "mean_theta"
 SD_THETA_COL = "sd_theta"
 ERROR_COL = "error"
@@ -52,7 +52,7 @@ def main():
         REF_CONTEXT_COL,
         ALT_CONTEXT_COL,
         METHYLATION_LEVEL_COL,
-        MU_GNOMAD_COL,
+        MU_COL,
         MEAN_THETA_COL,
         SD_THETA_COL,
         ERROR_COL,
@@ -60,7 +60,7 @@ def main():
     triplet_key = [REF_CONTEXT_COL, ALT_CONTEXT_COL, METHYLATION_LEVEL_COL]
     rename_columns = {
         METHYLATION_LEVEL_COL: METHYLATION_LEVEL_OUT_COL,
-        MU_GNOMAD_COL: MU_OUT_COL,
+        MU_COL: MU_OUT_COL,
         MEAN_THETA_COL: MEAN_THETA_OUT_COL,
         SD_THETA_COL: SD_THETA_OUT_COL,
         ERROR_COL: ERROR_OUT_COL,

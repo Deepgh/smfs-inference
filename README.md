@@ -22,7 +22,7 @@ The manuscript defines the SMFS as the frequency spectrum of alleles descending 
 
 ### `smfs/`
 
-* `smfs/match_sfs_to_mutation_rates.py`: Matches SFS rows to mutation-rate metadata by reference context, alternate context, and methylation level. It also attempts a reverse-complement context match for rows that do not match directly, then merges matched mutation-rate fields such as `mu_gnomad`, `mean_theta`, `sd_theta`, and error estimates into the SFS data.
+* `smfs/match_sfs_to_mutation_rates.py`: Matches SFS rows to mutation-rate metadata by reference context, alternate context, and methylation level. It also attempts a reverse-complement context match for rows that do not match directly, then merges matched mutation-rate fields such as `mu`, `mean_theta`, `sd_theta`, and error estimates into the SFS data.
 
 * `smfs/estimate_xi_poisson.py`: Estimates a global xi parameter using a Poisson model with site-specific sampled mutation rates. It separates segregating and non-segregating sites, minimizes the negative log-likelihood for xi, writes the xi estimate, and computes the expected number of sites with each possible number of unique mutations.
 

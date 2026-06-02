@@ -43,7 +43,7 @@ Required `mutation_rate_file` columns:
 | Reference sequence context | `ref_context_col` | `ref_context` |
 | Alternate sequence context | `alt_context_col` | `alt_context` |
 | Methylation level | `methylation_level_col` | `methylation_level` |
-| gnomAD mutation rate | `mu_gnomad_col` | `mu_gnomad` |
+| Mutation rate | `mu_col` | `mu` |
 | Mean theta | `mean_theta_col` | `mean_theta` |
 | Standard deviation of theta | `sd_theta_col` | `sd_theta` |
 | Error estimate | `error_col` | `error` |
@@ -169,7 +169,7 @@ Required columns:
 | Mean theta | `mean_theta_col` | `mean_theta` |
 | Standard deviation of theta | `sd_theta_col` | `sd_theta` |
 | Number of sites represented by the row | `num_sites_col` | `num_sites` |
-| gnomAD mutation rate | `mu_gnomad_col` | `mu_gnomad` |
+| gnomAD mutation rate | `mu_col` | `mu` |
 | Methylation level | `methylation_level_col` | `methylation_level` |
 
 The script also drops these columns if present in the input: `LL_no_heterogeneity`, `LL_heterogeneity`, `CV`, `LR`, `ref_context`, `alt_context`, `p_value`, `p_adj`.

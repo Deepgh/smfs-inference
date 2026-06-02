@@ -30,7 +30,7 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 | `methylation_level_col` | Methylation-level column. |
 | `sites_col` | Site-count column. |
 | `mutation_sum_col` | Temporary grouped mutation-count column. |
-| `mu_gnomad_col` | Input gnomAD mutation-rate column. |
+| `mu_col` | Input gnomAD mutation-rate column. |
 | `mean_theta_col` | Input mean-theta column. |
 | `sd_theta_col` | Input standard-deviation theta column. |
 | `error_col` | Input error column. |
@@ -111,7 +111,7 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 | `gamma_scale_col` | Gamma scale column. |
 | `seed_col` | Random seed column. |
 | `num_sites_col` | Number-of-sites column. |
-| `mu_gnomad_col` | Input gnomAD mutation-rate column. |
+| `mu_col` | Input gnomAD mutation-rate column. |
 | `methylation_level_col` | Input methylation-level column. |
 | `sampled_mu_col` | Diagnostic sampled-mu column. |
 | `sampled_sd_col` | Diagnostic sampled-standard-deviation column. |

@@ -35,7 +35,7 @@ GAMMA_SHAPE_COL = "k"
 GAMMA_SCALE_COL = "theta"
 SEED_COL = "seed"
 NUM_SITES_COL = "num_sites"
-MU_GNOMAD_COL = "mu_gnomad"
+MU_COL = "mu"
 METHYLATION_LEVEL_COL = "methylation_level"
 SAMPLED_MU_COL = "sampled mu"
 SAMPLED_SD_COL = "sampled sd"
@@ -97,7 +97,7 @@ def write_expanded_site_rates(df):
         long_df = pd.DataFrame(
             {
                 MUTATION_NUMBER_OUT_COL: [mut_num] * n,
-                MUTATION_RATE_OUT_COL: [row[MU_GNOMAD_COL]] * n,
+                MUTATION_RATE_OUT_COL: [row[MU_COL]] * n,
                 MEAN_THETA_OUT_COL: [row[MEAN_THETA_COL]] * n,
                 SD_THETA_OUT_COL: [row[SD_THETA_COL]] * n,
                 METHYLATION_LEVEL_OUT_COL: [row[METHYLATION_LEVEL_COL]] * n,
