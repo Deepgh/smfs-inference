@@ -28,7 +28,7 @@ initial_xi = 1000.0
 unique_mutation_limit = 300
 output_unique_mutation_file = "unq_mut_sites_300_josh_mew_sd.csv"
 
-[smfs.estimate_smfs_from_unique_mutations]
+[smfs.estimate_smfs]
 input_dir = "results"
 input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
 unique_mutation_sites_dir = "results"

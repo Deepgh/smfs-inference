@@ -51,7 +51,7 @@ output_unique_mutation_file = "unq_mut_sites_300_josh_mew_sd.csv"
 optimizer_method = "nelder-mead"
 eps = 0.000000000001
 
-[smfs.estimate_smfs_from_unique_mutations]
+[smfs.estimate_smfs]
 input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
 input_file = "edited_sim_data_smp_mu_diff_site.csv.gz"
 unique_mutation_sites_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/simulation_results/"
