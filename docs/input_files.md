@@ -12,7 +12,7 @@ mu_col = "my_sampled_mu_column"
 ac_col = "allele_count"
 ```
 
-The mutation-rate reference table is distributed as `reference_data/ajhg_00004094_supp_table2_mut.tsv`. Other original project inputs are not included.
+The mutation-rate reference table is distributed as `reference_data/mut_rates.csv`. Other original project inputs are not included.
 
 ## SMFS Scripts
 
@@ -25,7 +25,7 @@ Input files:
 | Config variable | Description |
 | --- | --- |
 | `sfs_file` | SFS table, read as gzipped CSV. |
-| `mutation_rate_file` | Mutation-rate metadata table, read as tab-separated text. |
+| `mutation_rate_file` | Mutation-rate metadata table, read as CSV or tab-separated text. |
 
 Required `sfs_file` columns:
 
@@ -160,7 +160,7 @@ Input file:
 
 | Config variable | Description |
 | --- | --- |
-| `input_file` | Mutation-rate metadata table, read as tab-separated text. |
+| `input_file` | Mutation-rate metadata table, read as CSV or tab-separated text. |
 
 Required columns:
 

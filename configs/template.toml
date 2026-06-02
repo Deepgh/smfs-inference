@@ -5,10 +5,9 @@
 
 [smfs.match_sfs_to_mutation_rates]
 sfs_file = "data/site_frequency_spectrum.csv.gz"
-mutation_rate_file = "reference_data/ajhg_00004094_supp_table2_mut.tsv"
+mutation_rate_file = "reference_data/mut_rates.csv"
 output_file = "results/matched_site_frequency_spectrum.csv.gz"
 save_output = true
-mu_col = "mu_gnomad"
 
 [smfs.estimate_xi_poisson]
 input_dir = "results"
@@ -38,13 +37,12 @@ output_dir = "results"
 ac_limit = 300
 output_file = "smfs_num_300_sim_smp_mu.csv"
 apply_error_correction = false
-error_file = "reference_data/ajhg_00004094_supp_table2_mut.tsv"
+error_file = "reference_data/mut_rates.csv"
 
 [population_model.sample_site_mutation_rates]
-input_file = "reference_data/ajhg_00004094_supp_table2_mut.tsv"
+input_file = "reference_data/mut_rates.csv"
 expanded_output_file = "results/sampled_site_mutation_rates.csv"
 diagnostic_output_file = "results/mutation_rate_sampling_diagnostics.csv"
-mu_col = "mu_gnomad"
 diagnostic_sample_size = 100000
 show_diagnostic_plots = false
 write_diagnostic_output = true
