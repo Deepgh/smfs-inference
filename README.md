@@ -5,7 +5,7 @@ This repository contains Python scripts associated with the manuscript *Accounti
 * `smfs/`: scripts for matching mutation-rate metadata, estimating xi, estimating expected numbers of unique mutations, and deriving predicted SMFS curves.
 * `population_model/`: scripts for generating and processing simulated population-genetic data used by the SMFS analyses.
 
-The scripts can be configured with TOML files passed through `--config`. `configs/template.toml` is a user-editable starting point, and `configs/paper_config.toml` records the paths and settings used for the submitted manuscript.
+The scripts can be configured with TOML files passed through `--config`. `configs/template.toml` is a user-editable starting point, and `publication_results/paper_config.toml` records the paths and settings used for the submitted manuscript.
 
 ## Overview
 
@@ -100,16 +100,16 @@ The analysis relies on:
 * Tabulated mutation-specific metadata, including mutation rates, methylation level, sequence context, mean theta, and standard deviation of theta.
 * SFS or allele-count summaries with site-count information.
 
-The original data files are not included in this repository due to size and project-specific storage constraints.
+The mutation-rate reference table is distributed in `reference_data/`. Other original input datasets are not included due to size and project-specific storage constraints. Selected publication result tables are retained in `publication_results/`.
 
 See `docs/input_files.md` for the expected input columns and generated outputs for each script.
 See `docs/config_variables.md` for the available TOML config variables.
 
 ## Reproducibility Notes
 
-The original input datasets are not distributed with this repository. To reproduce an analysis, provide equivalent input tables with the columns described in `docs/input_files.md` and configure paths with a TOML file such as `configs/template.toml` or `configs/paper_config.toml`.
+The mutation-rate reference table is distributed with this repository. To reproduce an analysis, provide the remaining input tables with the columns described in `docs/input_files.md` and configure paths with a TOML file such as `configs/template.toml` or `publication_results/paper_config.toml`.
 
-Several population-model scripts use random sampling. Re-running those scripts may produce different simulated outputs unless random seeds and input files are controlled. Generated filenames and some output column names preserve the original analysis naming for compatibility with existing downstream files.
+Several population-model scripts use random sampling. Re-running those scripts may produce different simulated outputs unless random seeds and input files are controlled. Default generated tables use normalized snake_case column names; use `publication_results/paper_config.toml` when working with the original publication data layout.
 
 ## Requirements
 

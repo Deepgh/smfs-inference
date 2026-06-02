@@ -12,7 +12,7 @@ mu_col = "my_sampled_mu_column"
 ac_col = "allele_count"
 ```
 
-The original project data are not included in this repository.
+The mutation-rate reference table is distributed as `reference_data/ajhg_00004094_supp_table2_mut.tsv`. Other original project inputs are not included.
 
 ## SMFS Scripts
 

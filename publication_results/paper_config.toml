@@ -1,9 +1,10 @@
-# This config preserves the original paths, filenames, column names, and defaults
-# that are hard-coded in the scripts used when producing results for publication.
+# This config preserves the filenames, column names, defaults, and unavailable
+# external paths used for publication. The bundled mutation-rate reference path
+# is relative to the repository root.
 
 [smfs.match_sfs_to_mutation_rates]
 sfs_file = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_syn_ac_1M.csv.gz"
-mutation_rate_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/ajhg_00004094_supp_table2_mut.tsv"
+mutation_rate_file = "reference_data/ajhg_00004094_supp_table2_mut.tsv"
 output_file = "/project/yuvalsim/Deep/project2/josh_full_data/sfs_per_site_missense_ac_1M.csv.gz"
 save_output = false
 ref_context_col = "ref_context"
@@ -11,7 +12,7 @@ alt_context_col = "alt_context"
 methylation_level_col = "methylation_level"
 sites_col = "Sites"
 mutation_sum_col = "mut_sum"
-mu_col = "mu"
+mu_col = "mu_gnomad"
 mean_theta_col = "mean_theta"
 sd_theta_col = "sd_theta"
 error_col = "error"
@@ -63,13 +64,13 @@ unique_mutation_sites_col = "Unq muts sites"
 ac_limit = 300
 output_file = "smfs_num_300_sim_smp_mu.csv"
 apply_error_correction = false
-error_file = "ajhg_00004094_supp_table2_mut.tsv"
+error_file = "reference_data/ajhg_00004094_supp_table2_mut.tsv"
 error_num_sites_col = "num_sites"
 error_rate_col = "error"
 error_scale = 1000000
 
 [population_model.sample_site_mutation_rates]
-input_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/ajhg_00004094_supp_table2_mut.tsv"
+input_file = "reference_data/ajhg_00004094_supp_table2_mut.tsv"
 expanded_output_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/scaled_mu_diff_site.csv"
 diagnostic_output_file = "/project/yuvalsim/Deep/project2/human_data/sim_hum_data/final_approach/scaled_mu_from_musd.csv"
 mean_theta_col = "mean_theta"
@@ -80,7 +81,7 @@ gamma_shape_col = "k"
 gamma_scale_col = "theta"
 seed_col = "seed"
 num_sites_col = "num_sites"
-mu_col = "mu"
+mu_col = "mu_gnomad"
 methylation_level_col = "methylation_level"
 sampled_mu_col = "sampled mu"
 sampled_sd_col = "sampled sd"
