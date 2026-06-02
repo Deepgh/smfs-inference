@@ -96,6 +96,37 @@ Config keys are lowercase versions of the uppercase constants in each script. Fo
 | `error_rate_col` | Error-rate column. |
 | `error_scale` | Scale factor applied to the error estimate. |
 
+## `smfs.reconstruct_sfs_from_smfs`
+
+| Variable | Description |
+| --- | --- |
+| `input_dir` | Directory containing `input_file`. |
+| `input_file` | Observed site-frequency spectrum grouped by context. |
+| `predicted_probability_dir` | Directory containing `predicted_probability_file`. |
+| `predicted_probability_file` | Inferred SMFS probability table. |
+| `xi_dir` | Directory containing `xi_file`. |
+| `xi_file` | Estimated xi table. |
+| `output_dir` | Output directory. |
+| `output_file` | Output reconstructed SFS comparison table. |
+| `ac_col` | Input allele-count column. |
+| `sites_col` | Input site-count column. |
+| `mean_col` | Input mean-theta column. |
+| `sd_col` | Input standard-deviation theta column. |
+| `methylation_level_col` | Input methylation-level column. |
+| `predicted_probability_col` | Inferred SMFS probability column. |
+| `xi_col` | Estimated xi column. |
+| `ac_out_col` | Output allele-count column. |
+| `methylation_level_out_col` | Output methylation-level column. |
+| `mean_out_col` | Output mean-theta column. |
+| `sd_out_col` | Output standard-deviation theta column. |
+| `num_sites_out_col` | Output site-count column. |
+| `prop_sites_out_col` | Internal proportional site-count column. |
+| `type_out_col` | Output comparison-type column. |
+| `data_type_label` | Output label for observed-data rows. |
+| `theory_type_label` | Output label for reconstructed-SFS rows. |
+| `ac_limit` | Maximum allele count included in the reconstruction. |
+| `rows_per_context` | Number of contiguous input rows per context group. |
+
 ## `population_model.sample_site_mutation_rates`
 
 | Variable | Description |

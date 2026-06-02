@@ -1,187 +1,248 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Feb 19 16:09:00 2025
 
-@author: ghosh1
-"""
+import os
+import sys
+from pathlib import Path
 
 import numpy as np
-import os
 import pandas as pd
-from scipy.stats import poisson, nbinom
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.special import gammaln
+from scipy.stats import nbinom
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from workflow_config import apply_config
+
+CONFIG_SECTION = "smfs.reconstruct_sfs_from_smfs"
+
+# Paths and files
+INPUT_DIR = "data"
+INPUT_FILE = "observed_site_frequency_spectrum.csv.gz"
+PREDICTED_PROBABILITY_DIR = "results"
+PREDICTED_PROBABILITY_FILE = "smfs_observed_300.csv"
+XI_DIR = "results"
+XI_FILE = "xi_negative_binomial.csv"
+OUTPUT_DIR = "results"
+OUTPUT_FILE = "reconstructed_sfs_by_context.csv"
+
+# Input column names
+AC_COL = "allele_count"
+SITES_COL = "sites"
+MEAN_COL = "mean_theta"
+SD_COL = "sd_theta"
+METHYLATION_LEVEL_COL = "methylation_level"
+PREDICTED_PROBABILITY_COL = "predicted_probability"
+XI_COL = "xi"
+
+# Internal column names
+MU_SD_RATIO_COL = "mu_sd_ratio"
+NUMERATOR_FACTOR_COL = "numerator_factor"
+
+# Output column names
+AC_OUT_COL = "allele_count"
+METHYLATION_LEVEL_OUT_COL = "methylation_level"
+MEAN_OUT_COL = "mean_theta"
+SD_OUT_COL = "sd_theta"
+NUM_SITES_OUT_COL = "num_sites"
+PROP_SITES_OUT_COL = "proportion_sites"
+TYPE_OUT_COL = "type"
+DATA_TYPE_LABEL = "data"
+THEORY_TYPE_LABEL = "theory"
+
+# Model settings
+AC_LIMIT = 200
+ROWS_PER_CONTEXT = 10**6 + 1
 
 
-path = '/project/yuvalsim/Deep/project2/josh_full_data/error_data/'
-muts_data_file = 'sfs_syn_err_ac_1M_freq_dist.csv.gz'
-pred_prob_file = 'smfs_num_300_err_josh_mew_sd.csv'
+def main(pred_df, muts_data_df, xi_df):
+    prob_counts = list(pred_df[PREDICTED_PROBABILITY_COL])
+    prob_counts.insert(0, 0)
 
+    conv_lists = [prob_counts]
+    conv = prob_counts
 
-pred_df =  pd.read_csv(os.path.join(path,pred_prob_file))
-muts_data_df = pd.read_csv(os.path.join(path, muts_data_file), compression='gzip')
+    for _ in range(AC_LIMIT + 1):
+        conv = np.convolve(prob_counts, conv)
+        conv_lists.append(conv)
 
-muts_data_df = muts_data_df.rename(columns={'AC_nfe_down': 'AC'})
-prob_counts = list(pred_df['pred prob'])
-prob_counts.insert(0,0)
+    xi = list(xi_df[XI_COL])[0]
 
-conv_lists =[]
-conv_lists.append(prob_counts)
-conv = prob_counts
+    muts_data_df[MU_SD_RATIO_COL] = (
+        muts_data_df[MEAN_COL] / muts_data_df[SD_COL]
+    ) ** 2
+    muts_data_df[NUMERATOR_FACTOR_COL] = (
+        xi * muts_data_df[MEAN_COL]
+    ) / muts_data_df[MU_SD_RATIO_COL]
 
-for i in range(201):
-    conv = np.convolve(prob_counts, conv)
-    conv_lists.append(conv)
+    mut = 1
+    prop_sites_df = pd.DataFrame()
+    all_sum_sites_data = pd.DataFrame()
 
-#%%
-lam_file = 'lam_mu_sd_josh_err.csv'
-lam_df = pd.read_csv(os.path.join(path,lam_file))
-lambd = list(lam_df['Lambda'])[0]
+    for i in range(0, len(muts_data_df), ROWS_PER_CONTEXT):
+        df = muts_data_df[i:i + ROWS_PER_CONTEXT]
 
+        gamma_mew = np.unique(df[MEAN_COL])[0]
+        gamma_sigma = np.unique(df[SD_COL])[0]
+        mu_sigma_rat = np.unique(df[MU_SD_RATIO_COL])[0]
+        mu_sig_nume = np.unique(df[NUMERATOR_FACTOR_COL])[0]
+        meth = np.unique(df[METHYLATION_LEVEL_COL])[0]
 
-# output_dir_1 = path+'stopgain_results_new_data/sites_ets_data_mu/'
-# if not os.path.exists(output_dir_1):
-#     os.makedirs(output_dir_1)
-# output_dir_2 = path+'stopgain_results_new_data/copies_mu/'
-# if not os.path.exists(output_dir_2):
-#     os.makedirs(output_dir_2)
+        mean = np.unique(df[MEAN_COL])[0]
+        sd = np.unique(df[SD_COL])[0]
 
-muts_data_df['mu_sd_rat'] =  (muts_data_df['Mean theta'] / muts_data_df['SD theta'])** 2
-muts_data_df['numerator factor'] = (lambd*muts_data_df['Mean theta'])/muts_data_df['mu_sd_rat']
+        df1 = pd.DataFrame()
+        tot_sites = sum(df[SITES_COL])
 
+        site_0 = (df[df[AC_COL] == 0])[SITES_COL].iloc[0]
+        pred_0 = tot_sites * (1 / ((1 + mu_sig_nume) ** mu_sigma_rat))
 
-mut = 1
-prop_sites_df = pd.DataFrame()
-all_sum_sites_data = pd.DataFrame()
-for i in range(0,len(muts_data_df),((10**6)+1)):
-    df = muts_data_df[i:i+((10**6)+1)]
+        pred_site_prop_0 = pred_0 / tot_sites
+        data_site_prop_0 = site_0 / tot_sites
 
-    #mew = np.unique(df['Mew'])[0]
-    gamma_mew = np.unique(df['Mean theta'])[0]
-    gamma_sigma = np.unique(df['SD theta'])[0]
-    mu_sigma_rat = np.unique(df['mu_sd_rat'])[0]
-    mu_sig_nume = np.unique(df['numerator factor'])[0]
-    meth = np.unique(df['Meth level'])[0]
+        prop_sites_data = pd.DataFrame(
+            [
+                {
+                    AC_OUT_COL: 0,
+                    METHYLATION_LEVEL_OUT_COL: meth,
+                    MEAN_OUT_COL: gamma_mew,
+                    SD_OUT_COL: gamma_sigma,
+                    PROP_SITES_OUT_COL: data_site_prop_0,
+                    TYPE_OUT_COL: DATA_TYPE_LABEL,
+                }
+            ]
+        )
+        prop_sites_theory = pd.DataFrame(
+            [
+                {
+                    AC_OUT_COL: 0,
+                    METHYLATION_LEVEL_OUT_COL: meth,
+                    MEAN_OUT_COL: gamma_mew,
+                    SD_OUT_COL: gamma_sigma,
+                    PROP_SITES_OUT_COL: pred_site_prop_0,
+                    TYPE_OUT_COL: THEORY_TYPE_LABEL,
+                }
+            ]
+        )
+        prop_sites_df = pd.concat(
+            [prop_sites_df, prop_sites_data, prop_sites_theory],
+            ignore_index=True,
+        )
 
-    mean = np.unique(df['Mean theta'])[0]
-    sd = np.unique(df['SD theta'])[0]
-    # mu_sigma_rat = float(gamma_mew/gamma_sigma)**2
-    # mu_sig_nume = (lambd*gamma_mew)/mu_sigma_rat
-
-    df1= pd.DataFrame()
-    tot_sites = sum(df['Sites'])
-
-    site_0 = (df[df['AC']==0])['Sites'].iloc[0]
-    pred_0 = tot_sites*(1/((1+mu_sig_nume)**mu_sigma_rat))
-    #pred_0 = tot_all_sites*poisson.pmf(0, lambd*mew)
-
-
-    pred_site_prop_0 = pred_0/tot_sites
-    data_site_prop_0 = site_0/tot_sites
-
-    prop_sites_data = pd.DataFrame([{'AC': 0, #"Mew": mew,
-                                     "Meth level":meth,
-                               'Gamma mew':gamma_mew,'Gamma sigma':gamma_sigma,
-                               'Prop sites':data_site_prop_0, 'Type':'Data'}])
-    prop_sites_theory = pd.DataFrame([{'AC': 0, #"Mew": mew,
-                                       "Meth level":meth,
-                               'Gamma mew':gamma_mew,'Gamma sigma':gamma_sigma,
-                               'Prop sites':pred_site_prop_0, 'Type':'Theory'}])
-    prop_sites_df = pd.concat([prop_sites_df, prop_sites_data, prop_sites_theory], ignore_index=True)
-
-
-    data_data = pd.DataFrame([{'AC': 0, #"Mew": mew,
-                               "Meth level":meth,
-                               'Gamma mew':gamma_mew,'Gamma sigma':gamma_sigma,
-                               'Num sites':site_0, 'Type':'Data'}])
-    theory_data = pd.DataFrame([{'AC': 0, #"Mew": mew,
-                                 "Meth level":meth,
-                                 'Gamma mew':gamma_mew,'Gamma sigma':gamma_sigma,
-                                 'Num sites':pred_0, 'Type':'Theory'}])
-    df1 = pd.concat([df1, data_data, theory_data], ignore_index=True)
-
-
-    for copy in range(1,201):
-
-        num_site = (df[df['AC']==copy])['Sites'].iloc[0]
-
-        pred_sum = 0
-        for l in range(copy):
-
-            #poi_coeff = poisson.pmf(l+1, lambd*mew)
-            # poi_coeff = np.exp(gammaln(l+1+mu_sigma_rat) - gammaln(1+l+1) -
-            #                     gammaln(mu_sigma_rat) +
-            #                     (l+1)*np.log(mu_sig_nume) -
-            #                     (l+1+mu_sigma_rat)*np.log(1+mu_sig_nume))
-            poi_coeff= (nbinom.pmf(l+1, n=(mean / sd)**2,
-                                           p=1/(1 + sd**2 *(lambd/mean ))))
-            conv_prob = poi_coeff*conv_lists[l][copy]
-            #print(copy,l)
-
-            pred_sum += conv_prob
-
-
-
-        pred_site = tot_sites*pred_sum
-
-        data_data = pd.DataFrame([{'AC': copy, #"Mew": mew,
-                                   "Meth level":meth,
-                                   'Gamma mew':gamma_mew, 'Gamma sigma':gamma_sigma,
-                                   'Num sites':num_site, 'Type':'Data'}])
-        theory_data = pd.DataFrame([{'AC': copy, #"Mew": mew,
-                                     "Meth level":meth,
-                                     'Gamma mew':gamma_mew, 'Gamma sigma':gamma_sigma,
-                                     'Num sites':pred_site, 'Type':'Theory'}])
+        data_data = pd.DataFrame(
+            [
+                {
+                    AC_OUT_COL: 0,
+                    METHYLATION_LEVEL_OUT_COL: meth,
+                    MEAN_OUT_COL: gamma_mew,
+                    SD_OUT_COL: gamma_sigma,
+                    NUM_SITES_OUT_COL: site_0,
+                    TYPE_OUT_COL: DATA_TYPE_LABEL,
+                }
+            ]
+        )
+        theory_data = pd.DataFrame(
+            [
+                {
+                    AC_OUT_COL: 0,
+                    METHYLATION_LEVEL_OUT_COL: meth,
+                    MEAN_OUT_COL: gamma_mew,
+                    SD_OUT_COL: gamma_sigma,
+                    NUM_SITES_OUT_COL: pred_0,
+                    TYPE_OUT_COL: THEORY_TYPE_LABEL,
+                }
+            ]
+        )
         df1 = pd.concat([df1, data_data, theory_data], ignore_index=True)
 
+        for copy in range(1, AC_LIMIT + 1):
+            num_site = (df[df[AC_COL] == copy])[SITES_COL].iloc[0]
 
-        data_site_prop = num_site/tot_sites
+            pred_sum = 0
+            for l in range(copy):
+                poi_coeff = nbinom.pmf(
+                    l + 1,
+                    n=(mean / sd) ** 2,
+                    p=1 / (1 + sd**2 * (xi / mean)),
+                )
+                conv_prob = poi_coeff * conv_lists[l][copy]
+                pred_sum += conv_prob
 
-        prop_sites_data = pd.DataFrame([{'AC': copy, #"Mew": mew,
-                                         "Meth level":meth,
-                                   'Gamma mew':gamma_mew,'Gamma sigma':gamma_sigma,
-                                   'Prop sites':data_site_prop, 'Type':'Data'}])
-        prop_sites_theory = pd.DataFrame([{'AC': copy, #"Mew": mew,
-                                           "Meth level":meth,
-                                   'Gamma mew':gamma_mew,'Gamma sigma':gamma_sigma,
-                                   'Prop sites':pred_sum, 'Type':'Theory'}])
-        prop_sites_df = pd.concat([prop_sites_df, prop_sites_data, prop_sites_theory], ignore_index=True)
+            pred_site = tot_sites * pred_sum
 
-    all_sum_sites_data = pd.concat([all_sum_sites_data, df1], ignore_index=True)
+            data_data = pd.DataFrame(
+                [
+                    {
+                        AC_OUT_COL: copy,
+                        METHYLATION_LEVEL_OUT_COL: meth,
+                        MEAN_OUT_COL: gamma_mew,
+                        SD_OUT_COL: gamma_sigma,
+                        NUM_SITES_OUT_COL: num_site,
+                        TYPE_OUT_COL: DATA_TYPE_LABEL,
+                    }
+                ]
+            )
+            theory_data = pd.DataFrame(
+                [
+                    {
+                        AC_OUT_COL: copy,
+                        METHYLATION_LEVEL_OUT_COL: meth,
+                        MEAN_OUT_COL: gamma_mew,
+                        SD_OUT_COL: gamma_sigma,
+                        NUM_SITES_OUT_COL: pred_site,
+                        TYPE_OUT_COL: THEORY_TYPE_LABEL,
+                    }
+                ]
+            )
+            df1 = pd.concat([df1, data_data, theory_data], ignore_index=True)
 
-    #mew_title =format_scientific(mew)
-    # plt.yscale('log')
-    # plt.title('$\mu$ = '+str(mew_title),fontsize=16)
-    # sns.barplot(df1, x="AC", y="Num sites", hue="Type", palette=['indianred', "steelblue"])
-    # ytick_labels = ['${}^{{{}}}$'.format(10, i) for i in range(0,int(np.ceil(np.log10(np.max(df1["Num sites"])))))]
-    # plt.yticks([10**k for k in range(0,int(np.ceil(np.log10(np.max(df1["Num sites"])))))],ytick_labels,fontsize=16)
-    # plt.xticks([0,10,20,30,40, 50],fontsize=16)
-    # plt.ylabel('Site count', fontsize=18)
-    # plt.xlabel('Allele count', fontsize=18)
-    # plt.minorticks_off()
-    # sns.despine(right=True, top=True)
-    # plt.gcf().subplots_adjust(bottom=0.16, left=0.16)
-    # plt.savefig(os.path.join(output_dir_1, 'mut_'+str(mut)+'.png'), dpi=1000)
-    #plt.show()
+            data_site_prop = num_site / tot_sites
 
-    print(mut)
-    # df_raw_data = muts_data_df[i:i+(10**6)+1]
-    # df2 = df_raw_data[df_raw_data['AC']<=200]
-    # plt.yscale('log')
-    # plt.title('$\mu$ = '+str(mew_title),fontsize=16)
-    # sns.barplot(df2, x="AC", y="Sites",color='darkslateblue')
-    # ytick_labels = ['${}^{{{}}}$'.format(10, i) for i in range(0,int(np.ceil(np.log10(np.max(df2["Sites"])))))]
-    # plt.yticks([10**k for k in range(0,int(np.ceil(np.log10(np.max(df2["Sites"])))))],ytick_labels,fontsize=16)
-    # plt.xticks([0,50,100,150,200],fontsize=16)
-    # plt.ylabel('Site count', fontsize=18)
-    # plt.xlabel('Allele count', fontsize=18)
-    # plt.minorticks_off()
-    # sns.despine(right=True, top=True)
-    # plt.gcf().subplots_adjust(bottom=0.16, left=0.16)
-    # plt.savefig(os.path.join(output_dir_2, 'copies_raw_'+str(mut)+'.png'), dpi=1000)
-    # plt.show()
-    mut+=1
+            prop_sites_data = pd.DataFrame(
+                [
+                    {
+                        AC_OUT_COL: copy,
+                        METHYLATION_LEVEL_OUT_COL: meth,
+                        MEAN_OUT_COL: gamma_mew,
+                        SD_OUT_COL: gamma_sigma,
+                        PROP_SITES_OUT_COL: data_site_prop,
+                        TYPE_OUT_COL: DATA_TYPE_LABEL,
+                    }
+                ]
+            )
+            prop_sites_theory = pd.DataFrame(
+                [
+                    {
+                        AC_OUT_COL: copy,
+                        METHYLATION_LEVEL_OUT_COL: meth,
+                        MEAN_OUT_COL: gamma_mew,
+                        SD_OUT_COL: gamma_sigma,
+                        PROP_SITES_OUT_COL: pred_sum,
+                        TYPE_OUT_COL: THEORY_TYPE_LABEL,
+                    }
+                ]
+            )
+            prop_sites_df = pd.concat(
+                [prop_sites_df, prop_sites_data, prop_sites_theory],
+                ignore_index=True,
+            )
 
-all_sum_sites_data.to_csv(os.path.join(path, 'all_sum_sites_mu_sd_missense.csv'), index=False)        
+        all_sum_sites_data = pd.concat([all_sum_sites_data, df1], ignore_index=True)
+        print(mut)
+        mut += 1
+
+    return all_sum_sites_data, prop_sites_df
+
+
+if __name__ == "__main__":
+    apply_config(CONFIG_SECTION, globals())
+
+    predicted_probability_df = pd.read_csv(
+        os.path.join(PREDICTED_PROBABILITY_DIR, PREDICTED_PROBABILITY_FILE)
+    )
+    mutation_data_df = pd.read_csv(
+        os.path.join(INPUT_DIR, INPUT_FILE),
+        compression="infer",
+    )
+    xi_df = pd.read_csv(os.path.join(XI_DIR, XI_FILE))
+
+    Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+    output_df, _ = main(predicted_probability_df, mutation_data_df, xi_df)
+    output_df.to_csv(os.path.join(OUTPUT_DIR, OUTPUT_FILE), index=False)

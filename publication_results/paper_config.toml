@@ -69,6 +69,34 @@ error_num_sites_col = "num_sites"
 error_rate_col = "error"
 error_scale = 1000000
 
+[smfs.reconstruct_sfs_from_smfs]
+input_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+input_file = "sfs_syn_err_ac_1M_freq_dist.csv.gz"
+predicted_probability_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+predicted_probability_file = "smfs_num_300_err_josh_mew_sd.csv"
+xi_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+xi_file = "lam_mu_sd_josh_err.csv"
+output_dir = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/"
+output_file = "all_sum_sites_mu_sd_missense.csv"
+ac_col = "AC_nfe_down"
+sites_col = "Sites"
+mean_col = "Mean theta"
+sd_col = "SD theta"
+methylation_level_col = "Meth level"
+predicted_probability_col = "pred prob"
+xi_col = "Lambda"
+ac_out_col = "AC"
+methylation_level_out_col = "Meth level"
+mean_out_col = "Gamma mew"
+sd_out_col = "Gamma sigma"
+num_sites_out_col = "Num sites"
+prop_sites_out_col = "Prop sites"
+type_out_col = "Type"
+data_type_label = "Data"
+theory_type_label = "Theory"
+ac_limit = 200
+rows_per_context = 1000001
+
 [population_model.sample_site_mutation_rates]
 input_file = "reference_data/mut_rates.csv"
 expanded_output_file = "/project/yuvalsim/Deep/project2/josh_full_data/error_data/scaled_mu_diff_site.csv"

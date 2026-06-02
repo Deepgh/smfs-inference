@@ -39,6 +39,18 @@ output_file = "smfs_num_300_sim_smp_mu.csv"
 apply_error_correction = false
 error_file = "reference_data/mut_rates.csv"
 
+[smfs.reconstruct_sfs_from_smfs]
+input_dir = "data"
+input_file = "observed_site_frequency_spectrum.csv.gz"
+predicted_probability_dir = "results"
+predicted_probability_file = "smfs_observed_300.csv"
+xi_dir = "results"
+xi_file = "xi_negative_binomial.csv"
+output_dir = "results"
+output_file = "reconstructed_sfs_by_context.csv"
+ac_limit = 200
+rows_per_context = 1000001
+
 [population_model.sample_site_mutation_rates]
 input_file = "reference_data/mut_rates.csv"
 expanded_output_file = "results/sampled_site_mutation_rates.csv"
